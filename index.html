@@ -380,7 +380,8 @@ function render(){
   document.getElementById('pNo').textContent=no.length;
   document.getElementById('pPe').textContent=pe.length;
 
-  const rowHtml=(p,tag,dim)=>`<div class="row${dim?' dim':''}"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${p.name}${p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':''}</div><div class="tag">${tag}</div></div>`;
+  const delBtn=(p)=>isAdmin()&&p.id!==CU?`<button onclick="removePlayer(${p.id})" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;cursor:pointer;">🗑️</button>`:'';
+  const rowHtml=(p,tag,dim)=>`<div class="row${dim?' dim':''}"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${p.name}${p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':''}</div><div class="tag">${tag}</div>${delBtn(p)}</div>`;
   document.getElementById('listSi').innerHTML=si.length?si.map(p=>rowHtml(p,'✅',false)).join(''):'<div class="empty">Nadie ha confirmado aún</div>';
   document.getElementById('listNo').innerHTML=no.length?no.map(p=>rowHtml(p,'❌',false)).join(''):'<div class="empty">—</div>';
   document.getElementById('listPe').innerHTML=pe.length?pe.map(p=>rowHtml(p,'⏳',true)).join(''):'<div class="empty">Todos respondieron 🎉</div>';
@@ -414,6 +415,14 @@ async function saveAdd(){
   btn.disabled=false; btn.textContent='Agregar';
   if(error){ toast('⚠️ '+error.message); return; }
   await loadPlayers(); render(); closeAdd(); toast('✅ '+name+' agregado');
+}
+
+async function removePlayer(uid){
+  const p=PLAYERS.find(x=>x.id===uid); if(!p) return;
+  if(!confirm(`¿Eliminar a ${p.name}?`)) return;
+  const {error}=await sb.from('participants').delete().eq('pool',POOL_ID).eq('id',uid);
+  if(error){ toast('⚠️ '+error.message); return; }
+  await loadPlayers(); render(); toast('🗑️ '+p.name+' eliminado');
 }
 
 // ── menu ──
