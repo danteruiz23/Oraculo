@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Oráculo">
   <link rel="manifest" href="manifest.json">
-  <title>Oráculo · Fútbol Sala Martes</title>
+  <title>Oráculo · Soccerland Opalocka</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -92,8 +92,8 @@
     .hero{background:linear-gradient(135deg,var(--p3),var(--p4));border-radius:var(--r);padding:20px;text-align:center;box-shadow:var(--sh);position:relative;overflow:hidden;}
     .hero::after{content:'⚽';position:absolute;right:-10px;bottom:-14px;font-size:90px;opacity:.10;}
     .hero-lbl{font-size:12px;color:var(--acc3);font-weight:800;letter-spacing:2px;text-transform:uppercase;}
-    .hero-date{font-size:26px;font-weight:900;margin-top:4px;text-transform:capitalize;}
-    .hero-time{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:rgba(0,0,0,.25);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;color:var(--gold);}
+    .hero-date{font-size:22px;font-weight:900;margin-top:4px;text-transform:capitalize;}
+    .hero-time{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:rgba(0,0,0,.25);padding:8px 18px;border-radius:20px;font-size:18px;font-weight:900;color:var(--gold);}
 
     /* mi respuesta */
     .ask{margin-top:16px;}
@@ -161,7 +161,7 @@
     <div class="lg-brand">
       <div class="lg-orb">🔮</div>
       <div class="lg-title">ORÁCULO</div>
-      <div class="lg-sub">Fútbol Sala</div>
+      <div class="lg-sub">Soccerland Opalocka</div>
       <div class="lg-event">⚽ Martes · 7:30–8:30 PM</div>
     </div>
     <div class="lg-card">
@@ -198,7 +198,7 @@
       <div class="hdr-orb">🔮</div>
       <div>
         <div class="hdr-t">ORÁCULO</div>
-        <div class="hdr-s"><span class="live"></span>Fútbol Sala Martes</div>
+        <div class="hdr-s"><span class="live"></span>Soccerland Opalocka</div>
       </div>
     </div>
     <div class="av" id="hdrAv" onclick="toggleMenu(event)">DR</div>
@@ -332,7 +332,7 @@ async function loginOK(){
   document.getElementById('loadOverlay').classList.add('hide');
   const u=getPlayer(CU);
   document.getElementById('hdrAv').textContent=u?u.init:'··';
-  document.getElementById('askQ').textContent=`Hola ${u?u.name.split(' ')[0]:''} 👋 ¿vas este martes?`;
+  document.getElementById('askQ').textContent=`Hola ${u?u.name.split(' ')[0]:''} 👋 ¿vas este ${new Date(FECHA+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long'})}?`;
   document.getElementById('login').classList.add('out');
   setTimeout(()=>{document.getElementById('login').style.display='none';},420);
   document.getElementById('app').style.display='flex';
