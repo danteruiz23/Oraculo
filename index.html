@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#1a103d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Oráculo">
+  <link rel="manifest" href="manifest.json">
+  <title>Oráculo · Fútbol Sala Martes</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    :root{
+      --p1:#140a2e;--p2:#1f1147;--p3:#2d1b69;--p4:#4c2a85;
+      --acc:#7c3aed;--acc2:#a855f7;--acc3:#c084fc;
+      --gold:#fbbf24;
+      --si:#22c55e;--si2:#16a34a;--no:#ef4444;--no2:#dc2626;
+      --bg:#0e0820;--card:#1b1140;--card2:#241652;
+      --tx:#ede9fe;--tx2:#b9aee0;--tx3:#7c719e;
+      --line:rgba(168,85,247,.16);
+      --r:18px;--safe-b:env(safe-area-inset-bottom,0px);
+      --sh:0 8px 30px rgba(0,0,0,.4);
+    }
+    html,body{height:100%;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.45;
+      background:var(--bg);color:var(--tx);display:flex;flex-direction:column;min-height:100%;
+      -webkit-text-size-adjust:100%;overflow-x:hidden;}
+
+    /* ── LOADING ── */
+    #loadOverlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:16px;transition:opacity .4s;}
+    #loadOverlay.hide{opacity:0;pointer-events:none;}
+    .spin{width:46px;height:46px;border:4px solid rgba(168,85,247,.18);border-top-color:var(--acc2);border-radius:50%;animation:sp .8s linear infinite;}
+    @keyframes sp{to{transform:rotate(360deg);}}
+    .lo-msg{color:var(--tx2);font-size:14px;font-weight:600;}
+
+    /* ── LOGIN ── */
+    #login{position:fixed;inset:0;z-index:900;overflow-y:auto;
+      background:radial-gradient(120% 80% at 50% -10%,#3a1d7a 0%,#1f1147 45%,#0e0820 100%);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:calc(env(safe-area-inset-top,0) + 20px) 22px calc(var(--safe-b) + 20px);transition:opacity .4s,transform .4s;}
+    #login.out{opacity:0;transform:scale(1.04);pointer-events:none;}
+    .lg-wrap{width:100%;max-width:380px;}
+    .lg-brand{text-align:center;margin-bottom:22px;}
+    .lg-orb{font-size:54px;filter:drop-shadow(0 6px 18px rgba(168,85,247,.6));}
+    .lg-title{font-size:34px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,var(--acc3),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:2px;}
+    .lg-sub{font-size:12px;color:var(--tx2);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+    .lg-event{font-size:12px;color:var(--gold);font-weight:700;margin-top:8px;}
+    .lg-card{background:rgba(27,17,64,.7);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r);padding:20px 18px;box-shadow:var(--sh);}
+    .lg-sel-wrap{position:relative;margin-bottom:16px;}
+    .lg-sel{width:100%;appearance:none;background:var(--card2);border:1.5px solid var(--line);border-radius:14px;
+      color:var(--tx);font-size:16px;font-weight:700;padding:14px 40px 14px 14px;cursor:pointer;}
+    .lg-chev{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--acc3);pointer-events:none;font-size:14px;}
+    .lg-lbl{text-align:center;font-size:13px;color:var(--tx2);font-weight:600;margin-bottom:10px;}
+    .dots{display:flex;justify-content:center;gap:14px;margin-bottom:14px;}
+    .dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--acc);transition:all .15s;}
+    .dot.on{background:var(--acc2);border-color:var(--acc2);box-shadow:0 0 12px var(--acc2);}
+    .lg-err{text-align:center;color:#fca5a5;font-size:13px;font-weight:700;min-height:18px;margin-bottom:8px;}
+    .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .key{background:var(--card2);border:1px solid var(--line);border-radius:14px;color:var(--tx);font-size:24px;font-weight:700;
+      padding:16px 0;cursor:pointer;transition:background .12s,transform .06s;}
+    .key:active{background:var(--acc);transform:scale(.96);}
+    .key.go{background:linear-gradient(135deg,var(--acc),var(--acc2));font-size:15px;font-weight:800;letter-spacing:.5px;border:none;}
+    .key.del{font-size:20px;color:var(--tx2);}
+    .shake{animation:shk .4s;}
+    @keyframes shk{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-9px);}40%,80%{transform:translateX(9px);}}
+    .lg-foot{text-align:center;font-size:11px;color:var(--tx3);margin-top:16px;line-height:1.6;}
+
+    /* ── APP ── */
+    #app{display:none;flex-direction:column;min-height:100%;}
+    .hdr{position:sticky;top:0;z-index:50;background:linear-gradient(120deg,var(--p2),var(--p4));
+      padding:calc(env(safe-area-inset-top,0) + 12px) 16px 12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.35);}
+    .hdr-l{display:flex;align-items:center;gap:10px;}
+    .hdr-orb{font-size:26px;}
+    .hdr-t{font-size:18px;font-weight:900;letter-spacing:1px;}
+    .hdr-s{font-size:11px;color:var(--acc3);font-weight:700;}
+    .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;cursor:pointer;border:2px solid rgba(255,255,255,.2);}
+    .menu{position:absolute;top:62px;right:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden;display:none;z-index:60;min-width:170px;}
+    .menu.on{display:block;}
+    .menu-it{padding:13px 16px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;}
+    .menu-it:last-child{border-bottom:none;}
+    .menu-it:active{background:var(--card2);}
+
+    main{flex:1;padding:16px 14px calc(var(--safe-b) + 30px);max-width:560px;width:100%;margin:0 auto;}
+
+    /* fecha hero */
+    .hero{background:linear-gradient(135deg,var(--p3),var(--p4));border-radius:var(--r);padding:20px;text-align:center;box-shadow:var(--sh);position:relative;overflow:hidden;}
+    .hero::after{content:'⚽';position:absolute;right:-10px;bottom:-14px;font-size:90px;opacity:.10;}
+    .hero-lbl{font-size:12px;color:var(--acc3);font-weight:800;letter-spacing:2px;text-transform:uppercase;}
+    .hero-date{font-size:26px;font-weight:900;margin-top:4px;text-transform:capitalize;}
+    .hero-time{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:rgba(0,0,0,.25);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;color:var(--gold);}
+
+    /* mi respuesta */
+    .ask{margin-top:16px;}
+    .ask-q{text-align:center;font-size:16px;font-weight:800;margin-bottom:12px;color:var(--tx);}
+    .ans{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .ans-btn{border:2px solid transparent;border-radius:16px;padding:18px 8px;font-size:17px;font-weight:900;cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .08s,box-shadow .2s;background:var(--card2);color:var(--tx2);}
+    .ans-btn .em{font-size:30px;}
+    .ans-btn:active{transform:scale(.97);}
+    .ans-btn.si.sel{background:linear-gradient(135deg,var(--si),var(--si2));color:#fff;border-color:#fff3;box-shadow:0 8px 24px rgba(34,197,94,.4);}
+    .ans-btn.no.sel{background:linear-gradient(135deg,var(--no),var(--no2));color:#fff;border-color:#fff3;box-shadow:0 8px 24px rgba(239,68,68,.4);}
+
+    /* contadores */
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;}
+    .st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 6px;text-align:center;}
+    .st-n{font-size:26px;font-weight:900;line-height:1;}
+    .st-n.si{color:var(--si);}.st-n.no{color:var(--no);}.st-n.pe{color:var(--tx3);}
+    .st-l{font-size:11px;color:var(--tx2);font-weight:700;margin-top:4px;text-transform:uppercase;letter-spacing:.5px;}
+
+    /* listas */
+    .sec-t{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--tx2);margin:22px 0 10px;text-transform:uppercase;letter-spacing:1px;}
+    .sec-t .pill{margin-left:auto;background:var(--card2);color:var(--tx2);font-size:12px;font-weight:800;padding:2px 10px;border-radius:20px;}
+    .row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 14px;margin-bottom:8px;}
+    .row .ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;}
+    .c0{background:#7c3aed;}.c1{background:#2563eb;}.c2{background:#0891b2;}.c3{background:#db2777;}.c4{background:#ea580c;}.c5{background:#16a34a;}
+    .row .nm{flex:1;font-size:15px;font-weight:700;}
+    .row .tag{font-size:18px;}
+    .row.dim{opacity:.55;}
+    .empty{color:var(--tx3);font-size:13px;text-align:center;padding:10px;}
+
+    .fab{position:fixed;right:18px;bottom:calc(var(--safe-b) + 20px);z-index:40;background:linear-gradient(135deg,var(--acc),var(--acc2));
+      color:#fff;border:none;border-radius:30px;padding:14px 20px;font-size:15px;font-weight:800;box-shadow:0 8px 24px rgba(124,58,237,.5);cursor:pointer;display:flex;align-items:center;gap:8px;}
+
+    /* modal */
+    .modal{position:fixed;inset:0;z-index:200;background:rgba(8,4,20,.7);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;}
+    .modal.on{display:flex;}
+    .sheet{background:var(--card);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:560px;padding:22px 18px calc(var(--safe-b) + 22px);box-shadow:var(--sh);animation:up .3s;}
+    @keyframes up{from{transform:translateY(100%);}to{transform:translateY(0);}}
+    .sheet h3{font-size:18px;font-weight:900;margin-bottom:4px;}
+    .sheet p{font-size:13px;color:var(--tx2);margin-bottom:16px;}
+    .fld{margin-bottom:14px;}
+    .fld label{display:block;font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:6px;}
+    .fld input{width:100%;background:var(--card2);border:1.5px solid var(--line);border-radius:12px;color:var(--tx);font-size:16px;padding:13px 14px;}
+    .fld input:focus{outline:none;border-color:var(--acc);}
+    .btn{width:100%;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;}
+    .btn-p{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
+    .btn-g{background:var(--card2);color:var(--tx2);margin-top:10px;}
+
+    /* toast */
+    #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;color:#1b1140;
+      padding:11px 20px;border-radius:22px;font-size:13px;font-weight:800;opacity:0;transition:all .3s;z-index:300;pointer-events:none;white-space:nowrap;box-shadow:var(--sh);}
+    #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+    .live{display:inline-block;width:7px;height:7px;background:var(--si);border-radius:50%;margin-right:5px;animation:bl 1.2s infinite;}
+    @keyframes bl{0%,100%{opacity:1;}50%{opacity:.25;}}
+  </style>
+</head>
+<body>
+
+<div id="loadOverlay"><div class="spin"></div><div class="lo-msg">Consultando al Oráculo…</div></div>
+<div id="toast">✅ Guardado</div>
+
+<!-- ════ LOGIN ════ -->
+<div id="login">
+  <div class="lg-wrap">
+    <div class="lg-brand">
+      <div class="lg-orb">🔮</div>
+      <div class="lg-title">ORÁCULO</div>
+      <div class="lg-sub">Fútbol Sala</div>
+      <div class="lg-event">⚽ Martes · 7:30–8:30 PM</div>
+    </div>
+    <div class="lg-card">
+      <div class="lg-sel-wrap">
+        <select class="lg-sel" id="lgName"><option value="">— Elige tu nombre —</option></select>
+        <span class="lg-chev">▼</span>
+      </div>
+      <div class="lg-lbl">Tu PIN de 4 dígitos</div>
+      <div class="dots"><div class="dot" id="d0"></div><div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div></div>
+      <div class="lg-err" id="lgErr"></div>
+      <div class="pad">
+        <button class="key" onclick="pp('1')">1</button>
+        <button class="key" onclick="pp('2')">2</button>
+        <button class="key" onclick="pp('3')">3</button>
+        <button class="key" onclick="pp('4')">4</button>
+        <button class="key" onclick="pp('5')">5</button>
+        <button class="key" onclick="pp('6')">6</button>
+        <button class="key" onclick="pp('7')">7</button>
+        <button class="key" onclick="pp('8')">8</button>
+        <button class="key" onclick="pp('9')">9</button>
+        <button class="key del" onclick="pdel()">⌫</button>
+        <button class="key" onclick="pp('0')">0</button>
+        <button class="key go" onclick="psubmit()">ENTRAR</button>
+      </div>
+      <div class="lg-foot">¿Olvidaste tu PIN? Contacta al admin (Dante)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-l">
+      <div class="hdr-orb">🔮</div>
+      <div>
+        <div class="hdr-t">ORÁCULO</div>
+        <div class="hdr-s"><span class="live"></span>Fútbol Sala Martes</div>
+      </div>
+    </div>
+    <div class="av" id="hdrAv" onclick="toggleMenu(event)">DR</div>
+    <div class="menu" id="menu">
+      <div class="menu-it" onclick="syncNow()">🔄 Actualizar</div>
+      <div class="menu-it" onclick="doLogout()">🚪 Cerrar sesión</div>
+    </div>
+  </div>
+
+  <main>
+    <div class="hero">
+      <div class="hero-lbl">Próxima fecha</div>
+      <div class="hero-date" id="heroDate">Martes</div>
+      <div class="hero-time">🕖 7:30 – 8:30 PM</div>
+    </div>
+
+    <div class="ask">
+      <div class="ask-q" id="askQ">¿Vas este martes?</div>
+      <div class="ans">
+        <button class="ans-btn si" id="btnSi" onclick="setMy('si')"><span class="em">✅</span>SÍ VOY</button>
+        <button class="ans-btn no" id="btnNo" onclick="setMy('no')"><span class="em">❌</span>NO VOY</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="st"><div class="st-n si" id="cSi">0</div><div class="st-l">Van</div></div>
+      <div class="st"><div class="st-n no" id="cNo">0</div><div class="st-l">No van</div></div>
+      <div class="st"><div class="st-n pe" id="cPe">0</div><div class="st-l">Sin responder</div></div>
+    </div>
+
+    <div class="sec-t">✅ Confirmados <span class="pill" id="pSi">0</span></div>
+    <div id="listSi"></div>
+
+    <div class="sec-t">❌ No van <span class="pill" id="pNo">0</span></div>
+    <div id="listNo"></div>
+
+    <div class="sec-t">⏳ Sin responder <span class="pill" id="pPe">0</span></div>
+    <div id="listPe"></div>
+  </main>
+
+  <button class="fab" onclick="openAdd()">＋ Jugador</button>
+</div>
+
+<!-- add modal -->
+<div class="modal" id="addModal" onclick="if(event.target===this)closeAdd()">
+  <div class="sheet">
+    <h3>Agregar jugador</h3>
+    <p>Se suma a la lista y podrá entrar con su PIN.</p>
+    <div class="fld"><label>Nombre completo</label><input id="addName" type="text" placeholder="Ej. Juan Pérez" autocomplete="off"></div>
+    <div class="fld"><label>PIN de 4 dígitos</label><input id="addPin" type="tel" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off"></div>
+    <button class="btn btn-p" id="addBtn" onclick="saveAdd()">Agregar</button>
+    <button class="btn btn-g" onclick="closeAdd()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRLojC2UzbjyZ-yLZil0MRQFGiMIkuTqhw8hXc';
+const POOL_ID = 'oraculo';
+const ADMIN_IDS = [0]; // Dante
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── STATE ──
+let CU = null;               // current user id
+let PLAYERS = [];            // [{id,name,init,cls}]
+let ATT = {};               // {user_id: 'si'|'no'}
+let FECHA = nextTuesday();   // YYYY-MM-DD
+
+// ── helpers ──
+function nextTuesday(){
+  const d = new Date();
+  const day = d.getDay();          // 0=dom..2=mar
+  let add = (2 - day + 7) % 7;     // dias hasta martes
+  // si es martes pero ya paso la hora del partido (>21:00) saltar al siguiente
+  if(add===0 && d.getHours()>=21) add = 7;
+  d.setDate(d.getDate()+add);
+  return d.toISOString().slice(0,10);
+}
+function fechaLabel(iso){
+  const [y,m,dd]=iso.split('-').map(Number);
+  const d=new Date(y,m-1,dd);
+  return d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+}
+function initials(name){return name.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();}
+function getPlayer(id){return PLAYERS.find(p=>p.id===id);}
+function isAdmin(){return ADMIN_IDS.includes(CU);}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+
+// ── LOGIN ──
+let pinBuf='';
+function pp(d){ if(pinBuf.length>=4)return; pinBuf+=d; updDots(); document.getElementById('lgErr').textContent=''; if(pinBuf.length===4)setTimeout(psubmit,250); }
+function pdel(){ pinBuf=pinBuf.slice(0,-1); updDots(); document.getElementById('lgErr').textContent=''; }
+function updDots(){ for(let i=0;i<4;i++)document.getElementById('d'+i).classList.toggle('on',i<pinBuf.length); }
+function shake(){ const el=document.getElementById('login'); el.classList.add('shake'); setTimeout(()=>el.classList.remove('shake'),400); }
+
+async function psubmit(){
+  const v=document.getElementById('lgName').value;
+  const err=document.getElementById('lgErr');
+  if(!v){ err.textContent='⚠️ Elige tu nombre primero'; pinBuf='';updDots(); return; }
+  if(pinBuf.length<4){ err.textContent='⚠️ Ingresa 4 dígitos'; return; }
+  const uid=parseInt(v);
+  let ok=false;
+  try{
+    const {data,error}=await sb.rpc('verify_pin',{p_pool:POOL_ID,p_user_id:uid,p_pin:pinBuf});
+    if(!error && data===true) ok=true;
+  }catch(e){}
+  if(ok){ CU=uid; await loginOK(); return; }
+  err.textContent='❌ PIN incorrecto'; pinBuf=''; updDots(); shake();
+}
+
+async function loadPlayers(){
+  const {data,error}=await sb.from('participants').select('id,name,init,cls,active').eq('pool',POOL_ID).order('id');
+  if(error){ toast('⚠️ '+error.message); return; }
+  PLAYERS=(data||[]).filter(p=>p.active!==false).map(p=>({id:p.id,name:p.name,init:p.init||initials(p.name),cls:p.cls||'c0'}));
+  const sel=document.getElementById('lgName');
+  sel.innerHTML='<option value="">— Elige tu nombre —</option>'+PLAYERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+async function loadAttendance(){
+  const {data,error}=await sb.from('attendance').select('user_id,status').eq('pool',POOL_ID).eq('fecha',FECHA);
+  ATT={};
+  if(!error && data) data.forEach(r=>{ATT[r.user_id]=r.status;});
+}
+
+async function loginOK(){
+  document.getElementById('loadOverlay').classList.remove('hide');
+  await loadAttendance();
+  document.getElementById('loadOverlay').classList.add('hide');
+  const u=getPlayer(CU);
+  document.getElementById('hdrAv').textContent=u?u.init:'··';
+  document.getElementById('askQ').textContent=`Hola ${u?u.name.split(' ')[0]:''} 👋 ¿vas este martes?`;
+  document.getElementById('login').classList.add('out');
+  setTimeout(()=>{document.getElementById('login').style.display='none';},420);
+  document.getElementById('app').style.display='flex';
+  document.querySelector('.fab').style.display=isAdmin()?'flex':'none';
+  subscribe();
+  render();
+}
+
+function doLogout(){
+  document.getElementById('menu').classList.remove('on');
+  CU=null; pinBuf=''; updDots();
+  document.getElementById('lgName').value='';
+  document.getElementById('lgErr').textContent='';
+  const lg=document.getElementById('login');
+  lg.style.display='flex'; lg.classList.remove('out');
+  document.getElementById('app').style.display='none';
+  sb.removeAllChannels();
+}
+
+// ── ASISTENCIA ──
+async function setMy(status){
+  if(CU===null) return;
+  const prev=ATT[CU];
+  ATT[CU]=status; render();
+  const {error}=await sb.from('attendance').upsert(
+    {pool:POOL_ID,user_id:CU,fecha:FECHA,status,updated_at:new Date().toISOString()},
+    {onConflict:'pool,user_id,fecha'}
+  );
+  if(error){ ATT[CU]=prev; render(); toast('⚠️ No se guardó: '+error.message); return; }
+  toast(status==='si'?'✅ ¡Confirmado, nos vemos!':'❌ Registrado, no vas');
+}
+
+function render(){
+  document.getElementById('heroDate').textContent=fechaLabel(FECHA);
+  document.getElementById('btnSi').classList.toggle('sel',ATT[CU]==='si');
+  document.getElementById('btnNo').classList.toggle('sel',ATT[CU]==='no');
+
+  const si=[],no=[],pe=[];
+  PLAYERS.forEach(p=>{ const s=ATT[p.id]; if(s==='si')si.push(p); else if(s==='no')no.push(p); else pe.push(p); });
+
+  document.getElementById('cSi').textContent=si.length;
+  document.getElementById('cNo').textContent=no.length;
+  document.getElementById('cPe').textContent=pe.length;
+  document.getElementById('pSi').textContent=si.length;
+  document.getElementById('pNo').textContent=no.length;
+  document.getElementById('pPe').textContent=pe.length;
+
+  const rowHtml=(p,tag,dim)=>`<div class="row${dim?' dim':''}"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${p.name}${p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':''}</div><div class="tag">${tag}</div></div>`;
+  document.getElementById('listSi').innerHTML=si.length?si.map(p=>rowHtml(p,'✅',false)).join(''):'<div class="empty">Nadie ha confirmado aún</div>';
+  document.getElementById('listNo').innerHTML=no.length?no.map(p=>rowHtml(p,'❌',false)).join(''):'<div class="empty">—</div>';
+  document.getElementById('listPe').innerHTML=pe.length?pe.map(p=>rowHtml(p,'⏳',true)).join(''):'<div class="empty">Todos respondieron 🎉</div>';
+}
+
+// ── REALTIME ──
+function subscribe(){
+  sb.channel('att-'+FECHA)
+    .on('postgres_changes',{event:'*',schema:'public',table:'attendance',filter:`fecha=eq.${FECHA}`},async()=>{ await loadAttendance(); render(); })
+    .on('postgres_changes',{event:'*',schema:'public',table:'participants'},async()=>{ await loadPlayers(); render(); })
+    .subscribe();
+}
+
+async function syncNow(){
+  document.getElementById('menu').classList.remove('on');
+  await loadPlayers(); await loadAttendance(); render(); toast('🔄 Actualizado');
+}
+
+// ── AGREGAR JUGADOR ──
+function openAdd(){ document.getElementById('addName').value=''; document.getElementById('addPin').value=''; document.getElementById('addModal').classList.add('on'); }
+function closeAdd(){ document.getElementById('addModal').classList.remove('on'); }
+async function saveAdd(){
+  const name=document.getElementById('addName').value.trim();
+  const pin=document.getElementById('addPin').value.trim();
+  if(name.length<2){ toast('⚠️ Escribe el nombre'); return; }
+  if(!/^\d{4}$/.test(pin)){ toast('⚠️ PIN de 4 dígitos'); return; }
+  const btn=document.getElementById('addBtn'); btn.disabled=true; btn.textContent='Agregando…';
+  const nextId=(PLAYERS.reduce((m,p)=>Math.max(m,p.id),0))+1;
+  const cls='c'+(nextId%6);
+  const {error}=await sb.from('participants').insert({id:nextId,pool:POOL_ID,name,init:initials(name),cls,pin});
+  btn.disabled=false; btn.textContent='Agregar';
+  if(error){ toast('⚠️ '+error.message); return; }
+  await loadPlayers(); render(); closeAdd(); toast('✅ '+name+' agregado');
+}
+
+// ── menu ──
+function toggleMenu(e){ e.stopPropagation(); document.getElementById('menu').classList.toggle('on'); }
+document.addEventListener('click',e=>{ if(!e.target.closest('#hdrAv')&&!e.target.closest('#menu'))document.getElementById('menu').classList.remove('on'); });
+
+// PIN input solo numeros
+document.getElementById('addPin').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,4);});
+
+// ── INIT ──
+(async function(){
+  await loadPlayers();
+  document.getElementById('loadOverlay').classList.add('hide');
+})();
+
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+</script>
+</body>
+</html>
