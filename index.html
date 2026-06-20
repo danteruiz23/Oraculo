@@ -410,8 +410,8 @@ function render(){
   document.getElementById('pPe').textContent=pe.length;
 
   const q=document.getElementById('quorum');
-  if(si.length>=MIN_PLAYERS){ q.className='quorum q-full'; q.innerHTML=`✅ ¡Hay equipo! ${si.length}/${MIN_PLAYERS} confirmados`; }
-  else{ const f=MIN_PLAYERS-si.length; q.className='quorum q-wait'; q.innerHTML=`⚽ Faltan <strong>${f}</strong> para completar equipo`; }
+  if(si.length>=MIN_PLAYERS){ q.className='quorum q-full'; q.innerHTML=`✅ ¡Hay equipo! ${si.length}/${MIN_PLAYERS} confirmados<br><span style="font-size:12px;font-weight:700;opacity:.75;">⏳ ${pe.length} sin responder</span>`; }
+  else{ const f=MIN_PLAYERS-si.length; q.className='quorum q-wait'; q.innerHTML=`⚽ Faltan <strong>${f}</strong> para completar equipo<br><span style="font-size:12px;font-weight:700;opacity:.75;">⏳ ${pe.length} sin responder</span>`; }
 
   const canDel=(p)=>isAdmin()&&p.id!==CU&&(CU===0||p.id!==0);
   const delBtn=(p)=>canDel(p)?`<button onclick="removePlayer(${p.id})" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;cursor:pointer;">🗑️</button>`:'';
