@@ -108,9 +108,9 @@
     .ans-btn.maybe.sel{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-color:#fff3;box-shadow:0 8px 24px rgba(245,158,11,.4);}
 
     /* contadores */
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px;}
     .st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 6px;text-align:center;}
-    .st-n{font-size:26px;font-weight:900;line-height:1;}
+    .st-n{font-size:22px;font-weight:900;line-height:1;}
     .st-n.si{color:var(--si);}.st-n.maybe{color:#f59e0b;}.st-n.no{color:var(--no);}.st-n.pe{color:var(--tx3);}
     .st-l{font-size:11px;color:var(--tx2);font-weight:700;margin-top:4px;text-transform:uppercase;letter-spacing:.5px;}
 
@@ -142,6 +142,11 @@
     .btn{width:100%;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;}
     .btn-p{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
     .btn-g{background:var(--card2);color:var(--tx2);margin-top:10px;}
+
+    /* quorum */
+    .quorum{margin-top:14px;border-radius:14px;padding:13px 16px;text-align:center;font-size:14px;font-weight:800;}
+    .quorum.q-full{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--si);}
+    .quorum.q-wait{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);color:#f59e0b;}
 
     /* toast */
     #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;color:#1b1140;
@@ -232,6 +237,8 @@
       <div class="st"><div class="st-n pe" id="cPe">0</div><div class="st-l">Sin responder</div></div>
     </div>
 
+    <div class="quorum q-wait" id="quorum">⚽ Faltan <strong>10</strong> para completar equipo</div>
+
     <div class="sec-t">✅ Confirmados <span class="pill" id="pSi">0</span></div>
     <div id="listSi"></div>
 
@@ -260,12 +267,25 @@
   </div>
 </div>
 
+<!-- edit modal -->
+<div class="modal" id="editModal" onclick="if(event.target===this)closeEdit()">
+  <div class="sheet">
+    <h3>Editar jugador</h3>
+    <p>Cambia el nombre o el PIN.</p>
+    <div class="fld"><label>Nombre completo</label><input id="editName" type="text" autocomplete="off"></div>
+    <div class="fld"><label>Nuevo PIN (vacío = no cambia)</label><input id="editPin" type="tel" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off"></div>
+    <button class="btn btn-p" id="editBtn" onclick="saveEdit()">Guardar</button>
+    <button class="btn btn-g" onclick="closeEdit()">Cancelar</button>
+  </div>
+</div>
+
 <script>
 // ── CONFIG ──
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRLojC2UzbjyZ-yLZil0MRQFGiMIkuTqhw8hXc';
 const POOL_ID = 'oraculo';
 const ADMIN_IDS = [0, 18]; // Dante Ruiz, Leonardo Odello
+const MIN_PLAYERS = 10;
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -389,9 +409,14 @@ function render(){
   document.getElementById('pNo').textContent=no.length;
   document.getElementById('pPe').textContent=pe.length;
 
+  const q=document.getElementById('quorum');
+  if(si.length>=MIN_PLAYERS){ q.className='quorum q-full'; q.innerHTML=`✅ ¡Hay equipo! ${si.length}/${MIN_PLAYERS} confirmados`; }
+  else{ const f=MIN_PLAYERS-si.length; q.className='quorum q-wait'; q.innerHTML=`⚽ Faltan <strong>${f}</strong> para completar equipo`; }
+
   const canDel=(p)=>isAdmin()&&p.id!==CU&&(CU===0||p.id!==0);
   const delBtn=(p)=>canDel(p)?`<button onclick="removePlayer(${p.id})" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;cursor:pointer;">🗑️</button>`:'';
-  const rowHtml=(p,tag,dim)=>`<div class="row${dim?' dim':''}"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${p.name}${p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':''}</div><div class="tag">${tag}</div>${delBtn(p)}</div>`;
+  const editBtn=(p)=>isAdmin()?`<button onclick="openEdit(${p.id})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--acc3);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;cursor:pointer;">✏️</button>`:'';
+  const rowHtml=(p,tag,dim)=>`<div class="row${dim?' dim':''}"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${p.name}${p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':''}</div><div class="tag">${tag}</div>${editBtn(p)}${delBtn(p)}</div>`;
   document.getElementById('listSi').innerHTML=si.length?si.map(p=>rowHtml(p,'✅',false)).join(''):'<div class="empty">Nadie ha confirmado aún</div>';
   document.getElementById('listMaybe').innerHTML=maybe.length?maybe.map(p=>rowHtml(p,'❓',false)).join(''):'<div class="empty">—</div>';
   document.getElementById('listNo').innerHTML=no.length?no.map(p=>rowHtml(p,'❌',false)).join(''):'<div class="empty">—</div>';
@@ -437,12 +462,37 @@ async function removePlayer(uid){
   await loadPlayers(); render(); toast('🗑️ '+p.name+' eliminado');
 }
 
+// ── EDITAR JUGADOR ──
+let EDIT_ID = null;
+function openEdit(uid){
+  const p=PLAYERS.find(x=>x.id===uid); if(!p) return;
+  EDIT_ID=uid;
+  document.getElementById('editName').value=p.name;
+  document.getElementById('editPin').value='';
+  document.getElementById('editModal').classList.add('on');
+}
+function closeEdit(){ document.getElementById('editModal').classList.remove('on'); EDIT_ID=null; }
+async function saveEdit(){
+  const name=document.getElementById('editName').value.trim();
+  const pin=document.getElementById('editPin').value.trim();
+  if(name.length<2){ toast('⚠️ Escribe el nombre'); return; }
+  if(pin && !/^\d{4}$/.test(pin)){ toast('⚠️ PIN debe ser 4 dígitos'); return; }
+  const btn=document.getElementById('editBtn'); btn.disabled=true; btn.textContent='Guardando…';
+  const upd={name,init:initials(name)};
+  if(pin) upd.pin=pin;
+  const {error}=await sb.from('participants').update(upd).eq('pool',POOL_ID).eq('id',EDIT_ID);
+  btn.disabled=false; btn.textContent='Guardar';
+  if(error){ toast('⚠️ '+error.message); return; }
+  await loadPlayers(); render(); closeEdit(); toast('✅ Jugador actualizado');
+}
+
 // ── menu ──
 function toggleMenu(e){ e.stopPropagation(); document.getElementById('menu').classList.toggle('on'); }
 document.addEventListener('click',e=>{ if(!e.target.closest('#hdrAv')&&!e.target.closest('#menu'))document.getElementById('menu').classList.remove('on'); });
 
-// PIN input solo numeros
+// PIN inputs solo numeros
 document.getElementById('addPin').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,4);});
+document.getElementById('editPin').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,4);});
 
 // ── INIT ──
 (async function(){
