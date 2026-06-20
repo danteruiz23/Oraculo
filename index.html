@@ -108,7 +108,7 @@
     .ans-btn.maybe.sel{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border-color:#fff3;box-shadow:0 8px 24px rgba(245,158,11,.4);}
 
     /* contadores */
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px;}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px;}
     .st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 6px;text-align:center;}
     .st-n{font-size:22px;font-weight:900;line-height:1;}
     .st-n.si{color:var(--si);}.st-n.maybe{color:#f59e0b;}.st-n.no{color:var(--no);}.st-n.pe{color:var(--tx3);}
@@ -234,7 +234,6 @@
       <div class="st"><div class="st-n si" id="cSi">0</div><div class="st-l">Van</div></div>
       <div class="st"><div class="st-n maybe" id="cMaybe">0</div><div class="st-l">Tentative</div></div>
       <div class="st"><div class="st-n no" id="cNo">0</div><div class="st-l">No van</div></div>
-      <div class="st"><div class="st-n pe" id="cPe">0</div><div class="st-l">Sin responder</div></div>
     </div>
 
     <div class="quorum q-wait" id="quorum">⚽ Faltan <strong>10</strong> para completar equipo</div>
@@ -403,7 +402,6 @@ function render(){
   document.getElementById('cSi').textContent=si.length;
   document.getElementById('cMaybe').textContent=maybe.length;
   document.getElementById('cNo').textContent=no.length;
-  document.getElementById('cPe').textContent=pe.length;
   document.getElementById('pSi').textContent=si.length;
   document.getElementById('pMaybe').textContent=maybe.length;
   document.getElementById('pNo').textContent=no.length;
