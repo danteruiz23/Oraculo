@@ -1,5 +1,5 @@
-// Oráculo · Service Worker
-const CACHE = 'oraculo-v1';
+// Oraculo · Service Worker
+const CACHE = 'oraculo-v2';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
