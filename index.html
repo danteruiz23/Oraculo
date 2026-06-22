@@ -86,6 +86,15 @@
     .menu-it:last-child{border-bottom:none;}
     .menu-it:active{background:var(--card2);}
 
+    /* admin vistoso */
+    .av.admin-on{box-shadow:0 0 0 3px var(--gold),0 0 16px rgba(251,191,36,.75);}
+    #adminBar{display:none;background:linear-gradient(90deg,#fde047,var(--gold),#f59e0b);color:#3a2900;font-weight:900;
+      text-align:center;padding:11px 14px;font-size:13px;letter-spacing:.4px;cursor:pointer;box-shadow:0 4px 16px rgba(251,191,36,.45);}
+    #adminBar.on{display:block;animation:abPulse 1.8s ease-in-out infinite;}
+    @keyframes abPulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.15);}}
+    #adminBar .x{margin-left:8px;opacity:.7;}
+    .key-dots{display:flex;justify-content:center;gap:14px;margin:6px 0 14px;}
+
     main{flex:1;padding:16px 14px calc(var(--safe-b) + 30px);max-width:560px;width:100%;margin:0 auto;}
 
     /* fecha hero */
@@ -198,6 +207,8 @@
     </div>
   </div>
 
+  <div id="adminBar" onclick="toggleAdmin()">🔐 MODO ADMIN ACTIVO — toca para salir <span class="x">✕</span></div>
+
   <main>
     <div class="hero">
       <div class="hero-lbl">Próxima fecha</div>
@@ -257,6 +268,17 @@
     <div class="fld"><label>Nombre completo</label><input id="editName" type="text" autocomplete="off"></div>
     <button class="btn btn-p" id="editBtn" onclick="saveEdit()">Guardar</button>
     <button class="btn btn-g" onclick="closeEdit()">Cancelar</button>
+  </div>
+</div>
+
+<!-- admin modal -->
+<div class="modal" id="adminModal" onclick="if(event.target===this)closeAdmin()">
+  <div class="sheet">
+    <h3>🔐 Modo administrador</h3>
+    <p>Ingresa la clave para gestionar jugadores y cambiar asistencias.</p>
+    <div class="fld"><label>Clave de admin</label><input id="adminKeyInput" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" style="text-align:center;letter-spacing:8px;font-size:22px;"></div>
+    <button class="btn btn-p" onclick="submitAdmin()">Activar admin</button>
+    <button class="btn btn-g" onclick="closeAdmin()">Cancelar</button>
   </div>
 </div>
 
@@ -381,6 +403,8 @@ async function setFor(uid,status){
 
 function render(){
   document.getElementById('heroDate').textContent=fechaLabel(FECHA);
+  document.getElementById('adminBar').classList.toggle('on',isAdminMode);
+  document.getElementById('hdrAv').classList.toggle('admin-on',isAdminMode);
   document.getElementById('btnSi').classList.toggle('sel',ATT[CU]==='si');
   document.getElementById('btnNo').classList.toggle('sel',ATT[CU]==='no');
   document.getElementById('btnMaybe').classList.toggle('sel',ATT[CU]==='maybe');
@@ -488,12 +512,22 @@ document.addEventListener('click',e=>{ if(!e.target.closest('#hdrAv')&&!e.target
   el.addEventListener('mouseleave',cancel);
 })();
 
+document.getElementById('adminKeyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') submitAdmin(); });
+
 function toggleAdmin(){
   document.getElementById('menu').classList.remove('on');
   if(isAdminMode){ isAdminMode=false; render(); toast('🔓 Modo admin desactivado'); return; }
-  const k=prompt('Clave de admin:');
-  if(k===null) return;
-  if(k===ADMIN_KEY){ isAdminMode=true; render(); toast('🔐 Modo admin activado'); }
+  openAdminModal();
+}
+function openAdminModal(){
+  const i=document.getElementById('adminKeyInput'); i.value='';
+  document.getElementById('adminModal').classList.add('on');
+  setTimeout(()=>i.focus(),120);
+}
+function closeAdmin(){ document.getElementById('adminModal').classList.remove('on'); }
+function submitAdmin(){
+  const k=document.getElementById('adminKeyInput').value.trim();
+  if(k===ADMIN_KEY){ isAdminMode=true; closeAdmin(); render(); toast('🔐 Modo admin activado'); }
   else toast('❌ Clave incorrecta');
 }
 
