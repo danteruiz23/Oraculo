@@ -101,8 +101,12 @@
     .hero{background:linear-gradient(135deg,var(--p3),var(--p4));border-radius:var(--r);padding:20px;text-align:center;box-shadow:var(--sh);position:relative;overflow:hidden;}
     .hero::after{content:'⚽';position:absolute;right:-10px;bottom:-14px;font-size:90px;opacity:.10;}
     .hero-lbl{font-size:12px;color:var(--acc3);font-weight:800;letter-spacing:2px;text-transform:uppercase;}
-    .hero-date{font-size:22px;font-weight:900;margin-top:4px;text-transform:capitalize;}
-    .hero-time{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:rgba(0,0,0,.25);padding:8px 18px;border-radius:20px;font-size:18px;font-weight:900;color:var(--gold);}
+    .hero-date{font-size:28px;font-weight:900;margin-top:4px;text-transform:capitalize;line-height:1.15;}
+    .hero-time{display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:rgba(0,0,0,.25);padding:11px 24px;border-radius:24px;font-size:23px;font-weight:900;color:var(--gold);}
+    .date-sel-lbl{font-size:11px;color:var(--tx2);font-weight:800;letter-spacing:1px;text-transform:uppercase;margin:16px 0 6px;text-align:center;}
+    .date-sel-wrap{position:relative;}
+    .date-sel{width:100%;appearance:none;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--tx);font-size:15px;font-weight:800;padding:13px 42px 13px 16px;cursor:pointer;text-transform:capitalize;}
+    .date-sel-wrap .dchev{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--acc3);pointer-events:none;font-size:13px;}
 
     /* mi respuesta */
     .ask{margin-top:16px;}
@@ -186,7 +190,7 @@
       </div>
       <div class="lg-err" id="lgErr"></div>
       <button class="btn btn-p" onclick="enterApp()">Entrar ⚽</button>
-      <div class="lg-foot">Elige tu nombre y entra — sin PIN.<br>Este celular te recordará la próxima vez.</div>
+      <div class="lg-foot">Elige tu nombre y entra — sin PIN.</div>
     </div>
   </div>
 </div>
@@ -212,9 +216,15 @@
 
   <main>
     <div class="hero">
-      <div class="hero-lbl">Próxima fecha</div>
+      <div class="hero-lbl">Fecha del partido</div>
       <div class="hero-date" id="heroDate">Martes</div>
       <div class="hero-time">🕖 7:30 – 8:30 PM</div>
+    </div>
+
+    <div class="date-sel-lbl">📅 Elegir fecha</div>
+    <div class="date-sel-wrap">
+      <select class="date-sel" id="fechaSel" onchange="changeFecha(this.value)"></select>
+      <span class="dchev">▼</span>
     </div>
 
     <div class="ask">
@@ -300,7 +310,8 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 let CU = null;               // current user id
 let PLAYERS = [];            // [{id,name,init,cls}]
 let ATT = {};               // {user_id: 'si'|'no'}
-let FECHA = nextTuesday();   // YYYY-MM-DD
+let FECHAS = nextTuesdays(4); // próximos 4 martes (se recalculan cada vez que abres)
+let FECHA = FECHAS[0];        // fecha seleccionada
 
 // ── helpers ──
 function nextTuesday(){
@@ -311,6 +322,30 @@ function nextTuesday(){
   if(add===0 && d.getHours()>=21) add = 7;
   d.setDate(d.getDate()+add);
   return d.toISOString().slice(0,10);
+}
+function nextTuesdays(n){
+  const base=new Date();
+  const day=base.getDay();
+  let add=(2-day+7)%7;                 // días hasta el próximo martes
+  if(add===0 && base.getHours()>=21) add=7; // si ya pasó el partido de hoy
+  base.setDate(base.getDate()+add);
+  const out=[];
+  for(let i=0;i<n;i++){ const d=new Date(base); d.setDate(base.getDate()+i*7); out.push(d.toISOString().slice(0,10)); }
+  return out;
+}
+function buildFechaSelect(){
+  const sel=document.getElementById('fechaSel');
+  sel.innerHTML=FECHAS.map((iso,i)=>`<option value="${iso}">${i===0?'➡️ ':''}${fechaLabel(iso)}</option>`).join('');
+  sel.value=FECHA;
+}
+async function changeFecha(iso){
+  FECHA=iso;
+  sb.removeAllChannels();
+  document.getElementById('loadOverlay').classList.remove('hide');
+  await loadAttendance();
+  document.getElementById('loadOverlay').classList.add('hide');
+  subscribe();
+  render();
 }
 function fechaLabel(iso){
   const [y,m,dd]=iso.split('-').map(Number);
@@ -359,6 +394,7 @@ async function loginOK(){
   setTimeout(()=>{document.getElementById('login').style.display='none';},420);
   document.getElementById('app').style.display='flex';
   document.querySelector('.fab').style.display='flex';
+  buildFechaSelect();
   subscribe();
   render();
 }
@@ -404,6 +440,7 @@ async function setFor(uid,status){
 
 function render(){
   document.getElementById('heroDate').textContent=fechaLabel(FECHA);
+  const fs=document.getElementById('fechaSel'); if(fs && fs.value!==FECHA) fs.value=FECHA;
   document.getElementById('adminBar').classList.toggle('on',isAdminMode);
   document.getElementById('hdrAv').classList.toggle('admin-on',isAdminMode);
   const at=document.getElementById('adminToggle'); if(at) at.textContent=isAdminMode?'🔓 Salir de admin':'🔐 Modo admin';
