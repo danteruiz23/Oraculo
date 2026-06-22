@@ -203,6 +203,7 @@
     </div>
     <div class="av" id="hdrAv" onclick="toggleMenu(event)">DR</div>
     <div class="menu" id="menu">
+      <div class="menu-it" id="adminToggle" onclick="toggleAdmin()">🔐 Modo admin</div>
       <div class="menu-it" onclick="doLogout()">🚪 Salir</div>
     </div>
   </div>
@@ -405,6 +406,7 @@ function render(){
   document.getElementById('heroDate').textContent=fechaLabel(FECHA);
   document.getElementById('adminBar').classList.toggle('on',isAdminMode);
   document.getElementById('hdrAv').classList.toggle('admin-on',isAdminMode);
+  const at=document.getElementById('adminToggle'); if(at) at.textContent=isAdminMode?'🔓 Salir de admin':'🔐 Modo admin';
   document.getElementById('btnSi').classList.toggle('sel',ATT[CU]==='si');
   document.getElementById('btnNo').classList.toggle('sel',ATT[CU]==='no');
   document.getElementById('btnMaybe').classList.toggle('sel',ATT[CU]==='maybe');
