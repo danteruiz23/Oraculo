@@ -194,9 +194,7 @@
     </div>
     <div class="av" id="hdrAv" onclick="toggleMenu(event)">DR</div>
     <div class="menu" id="menu">
-      <div class="menu-it" onclick="syncNow()">🔄 Actualizar</div>
-      <div class="menu-it" id="adminToggle" onclick="toggleAdmin()">🔐 Modo admin</div>
-      <div class="menu-it" onclick="doLogout()">🔄 Cambiar de nombre</div>
+      <div class="menu-it" onclick="doLogout()">🚪 Salir</div>
     </div>
   </div>
 
@@ -345,7 +343,6 @@ async function loginOK(){
 function doLogout(){
   document.getElementById('menu').classList.remove('on');
   CU=null; isAdminMode=false;
-  document.getElementById('adminToggle').textContent='🔐 Modo admin';
   try{ localStorage.removeItem(REMEMBER_KEY); }catch(e){}
   document.getElementById('lgName').value='';
   document.getElementById('lgErr').textContent='';
@@ -477,12 +474,26 @@ async function saveEdit(){
 function toggleMenu(e){ e.stopPropagation(); document.getElementById('menu').classList.toggle('on'); }
 document.addEventListener('click',e=>{ if(!e.target.closest('#hdrAv')&&!e.target.closest('#menu'))document.getElementById('menu').classList.remove('on'); });
 
+// Modo admin: mantener presionado el logo 🔮 (1 seg)
+(function(){
+  const el=document.querySelector('.hdr-l'); if(!el) return;
+  let t=null;
+  const start=()=>{ t=setTimeout(()=>{ t=null; toggleAdmin(); },1000); };
+  const cancel=()=>{ if(t){ clearTimeout(t); t=null; } };
+  el.addEventListener('touchstart',start,{passive:true});
+  el.addEventListener('touchend',cancel);
+  el.addEventListener('touchmove',cancel);
+  el.addEventListener('mousedown',start);
+  el.addEventListener('mouseup',cancel);
+  el.addEventListener('mouseleave',cancel);
+})();
+
 function toggleAdmin(){
   document.getElementById('menu').classList.remove('on');
-  if(isAdminMode){ isAdminMode=false; document.getElementById('adminToggle').textContent='🔐 Modo admin'; render(); toast('🔓 Modo admin desactivado'); return; }
+  if(isAdminMode){ isAdminMode=false; render(); toast('🔓 Modo admin desactivado'); return; }
   const k=prompt('Clave de admin:');
   if(k===null) return;
-  if(k===ADMIN_KEY){ isAdminMode=true; document.getElementById('adminToggle').textContent='🔓 Salir de admin'; render(); toast('🔐 Modo admin activado'); }
+  if(k===ADMIN_KEY){ isAdminMode=true; render(); toast('🔐 Modo admin activado'); }
   else toast('❌ Clave incorrecta');
 }
 
