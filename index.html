@@ -333,11 +333,11 @@
     <div id="teamsHint" class="ts-hint"></div>
     <div class="ts-cols">
       <div class="ts-team ts-a">
-        <div class="ts-team-h">⚪ Equipo A <span id="cntA">0</span>/6</div>
+        <div class="ts-team-h">⚪ <span id="labelA">Equipo A</span> <span id="cntA">0</span>/6 <button id="editA" onclick="editTeamName('A')" style="display:none;background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;">✏️</button></div>
         <div id="teamA"></div>
       </div>
       <div class="ts-team ts-b">
-        <div class="ts-team-h">⚫ Equipo B <span id="cntB">0</span>/6</div>
+        <div class="ts-team-h">⚫ <span id="labelB">Equipo B</span> <span id="cntB">0</span>/6 <button id="editB" onclick="editTeamName('B')" style="display:none;background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;">✏️</button></div>
         <div id="teamB"></div>
       </div>
     </div>
@@ -378,6 +378,7 @@ let PLAYERS = [];            // [{id,name,init,cls}]
 let ATT = {};               // {user_id: 'si'|'no'}
 let TEAMS = {};             // {user_id: 'A'|'B'}
 let teamsOpen = false;
+let TEAM_NAMES = {A:'Equipo A', B:'Equipo B'};
 let FECHAS = nextTuesdays(4); // próximos 4 martes (se recalculan cada vez que abres)
 let FECHA = FECHAS[0];        // fecha seleccionada
 
@@ -573,7 +574,23 @@ async function openTeams(){
 }
 function closeTeams(){ teamsOpen=false; document.getElementById('teamsScreen').classList.remove('on'); }
 
+function editTeamName(team){
+  if(!isAdminMode) return;
+  const cur=TEAM_NAMES[team];
+  const nuevo=prompt(`Nombre del Equipo ${team}:`, cur);
+  if(!nuevo||!nuevo.trim()) return;
+  TEAM_NAMES[team]=nuevo.trim();
+  localStorage.setItem('oraculo_team_names', JSON.stringify(TEAM_NAMES));
+  renderTeams();
+}
+
 function renderTeams(){
+  const saved=localStorage.getItem('oraculo_team_names');
+  if(saved) try{ Object.assign(TEAM_NAMES, JSON.parse(saved)); }catch(e){}
+  document.getElementById('labelA').textContent=TEAM_NAMES.A;
+  document.getElementById('labelB').textContent=TEAM_NAMES.B;
+  document.getElementById('editA').style.display=isAdminMode?'inline':'none';
+  document.getElementById('editB').style.display=isAdminMode?'inline':'none';
   document.getElementById('teamsDate').textContent=fechaLabel(FECHA);
   document.getElementById('teamsAdminCtrls').style.display=isAdminMode?'flex':'none';
   const confirmed=PLAYERS.filter(p=>ATT[p.id]==='si');
