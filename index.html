@@ -136,6 +136,10 @@
     .row .nm{flex:1;font-size:15px;font-weight:700;}
     .row .tag{font-size:18px;}
     .row.dim{opacity:.55;}
+    .row-admin{flex-direction:column;align-items:stretch;gap:10px;}
+    .row-admin .row-top{display:flex;align-items:center;gap:12px;}
+    .row-admin .row-actions{display:flex;gap:6px;flex-wrap:wrap;padding-left:48px;}
+    .row-admin .row-actions button{flex:0 0 auto;}
     .empty{color:var(--tx3);font-size:13px;text-align:center;padding:10px;}
 
     .fab{position:fixed;right:18px;bottom:calc(var(--safe-b) + 20px);z-index:40;background:linear-gradient(135deg,var(--acc),var(--acc2));
@@ -468,7 +472,13 @@ function render(){
   const editBtn=(p)=>isAdmin()?`<button onclick="openEdit(${p.id})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--acc3);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;cursor:pointer;">✏️</button>`:'';
   const aBtn=(p,st,emoji,c)=>{const on=ATT[p.id]===st;return `<button onclick="setFor(${p.id},'${st}')" style="background:${on?c:'rgba(255,255,255,.05)'};border:1px solid ${on?c:'var(--line)'};border-radius:8px;padding:4px 8px;font-size:13px;cursor:pointer;">${emoji}</button>`;};
   const statusBtns=(p)=>`<div style="display:flex;gap:4px;">${aBtn(p,'si','✅','rgba(34,197,94,.4)')}${aBtn(p,'maybe','❓','rgba(245,158,11,.4)')}${aBtn(p,'no','❌','rgba(239,68,68,.4)')}</div>`;
-  const rowHtml=(p,tag,dim)=>`<div class="row${dim?' dim':''}"${isAdmin()?' style="flex-wrap:wrap;row-gap:8px;"':''}><div class="ava ${p.cls}">${p.init}</div><div class="nm">${p.name}${p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':''}</div>${isAdmin()?statusBtns(p):'<div class="tag">'+tag+'</div>'}${editBtn(p)}${delBtn(p)}</div>`;
+  const rowHtml=(p,tag,dim)=>{
+    const nm=`${p.name}${p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':''}`;
+    if(isAdmin()){
+      return `<div class="row row-admin${dim?' dim':''}"><div class="row-top"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${nm}</div></div><div class="row-actions">${statusBtns(p)}${editBtn(p)}${delBtn(p)}</div></div>`;
+    }
+    return `<div class="row${dim?' dim':''}"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${nm}</div><div class="tag">${tag}</div></div>`;
+  };
   document.getElementById('listSi').innerHTML=si.length?si.map(p=>rowHtml(p,'✅',false)).join(''):'<div class="empty">Nadie ha confirmado aún</div>';
   document.getElementById('listMaybe').innerHTML=maybe.length?maybe.map(p=>rowHtml(p,'❓',false)).join(''):'<div class="empty">—</div>';
   document.getElementById('listNo').innerHTML=no.length?no.map(p=>rowHtml(p,'❌',false)).join(''):'<div class="empty">—</div>';
