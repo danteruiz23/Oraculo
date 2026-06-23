@@ -112,9 +112,9 @@
     .ask{margin-top:16px;}
     .ask-q{text-align:center;font-size:16px;font-weight:800;margin-bottom:12px;color:var(--tx);}
     .ans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-    .ans-btn{border:2px solid transparent;border-radius:16px;padding:14px 6px;font-size:14px;font-weight:900;cursor:pointer;
-      display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform .08s,box-shadow .2s;background:var(--card2);color:var(--tx2);}
-    .ans-btn .em{font-size:26px;}
+    .ans-btn{border:2px solid transparent;border-radius:16px;padding:10px 4px;font-size:10px;font-weight:900;cursor:pointer;
+      display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .08s,box-shadow .2s;background:var(--card2);color:var(--tx2);}
+    .ans-btn .em{font-size:18px;}
     .ans-btn:active{transform:scale(.97);}
     .ans-btn.si.sel{background:linear-gradient(135deg,var(--si),var(--si2));color:#fff;border-color:#fff3;box-shadow:0 8px 24px rgba(34,197,94,.4);}
     .ans-btn.no.sel{background:linear-gradient(135deg,var(--no),var(--no2));color:#fff;border-color:#fff3;box-shadow:0 8px 24px rgba(239,68,68,.4);}
@@ -123,7 +123,7 @@
     /* contadores */
     .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px;}
     .st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 6px;text-align:center;}
-    .st-n{font-size:22px;font-weight:900;line-height:1;}
+    .st-n{font-size:15px;font-weight:900;line-height:1;}
     .st-n.si{color:var(--si);}.st-n.maybe{color:#f59e0b;}.st-n.no{color:var(--no);}.st-n.pe{color:var(--tx3);}
     .st-l{font-size:11px;color:var(--tx2);font-weight:700;margin-top:4px;text-transform:uppercase;letter-spacing:.5px;}
 
@@ -278,7 +278,7 @@
 
     <div class="quorum q-wait" id="quorum">⚽ Faltan <strong>10</strong> para completar equipo</div>
 
-    <button class="teams-open" onclick="openTeams()">🆚 Armar equipos · 6 vs 6</button>
+    <button class="teams-open" onclick="openTeams()">🆚 Equipos Oraculo</button>
 
     <div class="sec-t">✅ Confirmados <span class="pill" id="pSi">0</span></div>
     <div id="listSi"></div>
