@@ -327,14 +327,16 @@ function nextTuesday(){
   d.setDate(d.getDate()+add);
   return d.toISOString().slice(0,10);
 }
+function isoLocal(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function nextTuesdays(n){
-  const base=new Date();
-  const day=base.getDay();
-  let add=(2-day+7)%7;                 // días hasta el próximo martes
-  if(add===0 && base.getHours()>=21) add=7; // si ya pasó el partido de hoy
-  base.setDate(base.getDate()+add);
+  // "ahora" en hora del Este (EST/EDT), sin importar la zona del teléfono
+  const et=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+  const day=et.getDay();                       // 0=dom .. 2=mar
+  let add=(2-day+7)%7;                          // días hasta el próximo martes
+  if(add===0 && et.getHours()>=21) add=7;       // si ya pasó el partido de hoy (después de 9pm ET)
+  const first=new Date(et.getFullYear(),et.getMonth(),et.getDate()+add);
   const out=[];
-  for(let i=0;i<n;i++){ const d=new Date(base); d.setDate(base.getDate()+i*7); out.push(d.toISOString().slice(0,10)); }
+  for(let i=0;i<n;i++){ const d=new Date(first.getFullYear(),first.getMonth(),first.getDate()+i*7); out.push(isoLocal(d)); }
   return out;
 }
 function buildFechaSelect(){
