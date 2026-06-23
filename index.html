@@ -298,11 +298,11 @@
 </div>
 
 <script>
-// ── CONFIG (injected from env vars at build time) ──
+// ── CONFIG ──
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
-const SUPABASE_KEY = '';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRL3W0W9U1X0UsmA_rj2g_qEHfZ5LlcN0GYLho';
 const POOL_ID = 'oraculo';
-const ADMIN_KEY = '';
+const ADMIN_KEY = '2372';
 const MIN_PLAYERS = 12;
 const REMEMBER_KEY = 'oraculo_me';
 let isAdminMode = false;
@@ -475,8 +475,8 @@ function render(){
   else{ const f=MIN_PLAYERS-si.length; q.className='quorum q-wait'; q.innerHTML=`⚽ Faltan <strong>${f}</strong> para completar equipo<br><span style="font-size:12px;font-weight:700;opacity:.75;">📢 Pásalo a los que no respondieron</span>`; }
 
   const canDel=(p)=>isAdmin();
-  const delBtn=(p)=>canDel(p)?`<button onclick="removePlayer(${p.id})" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">🗑️ Eliminar</button>`:`'';
-  const editBtn=(p)=>isAdmin()?`<button onclick="openEdit(${p.id})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--acc3);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Editar</button>`:`''`;
+  const delBtn=(p)=>canDel(p)?`<button onclick="removePlayer(${p.id})" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">🗑️ Eliminar</button>`:``;
+  const editBtn=(p)=>isAdmin()?`<button onclick="openEdit(${p.id})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--acc3);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Editar</button>`:``;
   const aBtn=(p,st,emoji,c)=>{const on=ATT[p.id]===st;return `<button onclick="setFor(${p.id},'${st}')" style="background:${on?c:'rgba(255,255,255,.05)'};border:1px solid ${on?c:'var(--line)'};border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;color:#fff;">${emoji}</button>`;};
   const statusBtns=(p)=>`<div style="display:flex;gap:4px;">${aBtn(p,'si','✅','rgba(34,197,94,.4)')}${aBtn(p,'maybe','❓','rgba(245,158,11,.4)')}${aBtn(p,'no','❌','rgba(239,68,68,.4)')}</div>`;
   const rowHtml=(p,tag,dim)=>{
