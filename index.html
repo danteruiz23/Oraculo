@@ -48,7 +48,7 @@
     .lg-wrap{width:100%;max-width:380px;}
     .lg-brand{text-align:center;margin-bottom:22px;}
     .lg-orb{font-size:54px;filter:drop-shadow(0 6px 18px rgba(168,85,247,.6));}
-    .lg-title{font-size:34px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,var(--acc3),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;margin-top:2px;}
+    .lg-title{font-size:34px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,var(--acc3),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
     .lg-sub{font-size:18px;color:var(--tx2);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;}
     .lg-event{font-size:16px;color:var(--gold);font-weight:800;margin-top:12px;}
     .lg-card{background:rgba(27,17,64,.7);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r);padding:20px 18px;box-shadow:var(--sh);}
@@ -79,7 +79,7 @@
     .hdr-orb{font-size:26px;}
     .hdr-t{font-size:18px;font-weight:900;letter-spacing:1px;}
     .hdr-s{font-size:11px;color:var(--acc3);font-weight:700;}
-    .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;cursor:pointer;border:2px solid rgba(255,255,255,.2);}
+    .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;cursor:pointer;}
     .menu{position:absolute;top:62px;right:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden;display:none;z-index:60;min-width:170px;}
     .menu.on{display:block;}
     .menu-it{padding:13px 16px;font-size:14px;font-weight:600;cursor:pointer;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;}
@@ -105,7 +105,7 @@
     .hero-time{display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:rgba(0,0,0,.25);padding:11px 24px;border-radius:24px;font-size:23px;font-weight:900;color:var(--gold);}
     .date-sel-lbl{font-size:11px;color:var(--tx2);font-weight:800;letter-spacing:1px;text-transform:uppercase;margin:16px 0 6px;text-align:center;}
     .date-sel-wrap{position:relative;}
-    .date-sel{width:100%;appearance:none;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--tx);font-size:15px;font-weight:800;padding:13px 42px 13px 16px;cursor:pointer;text-transform:capitalize;}
+    .date-sel{width:100%;appearance:none;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--tx);font-size:15px;font-weight:800;padding:13px 42px 13px 16px;cursor:pointer;}
     .date-sel-wrap .dchev{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--acc3);pointer-events:none;font-size:13px;}
 
     /* mi respuesta */
@@ -148,7 +148,7 @@
     /* modal */
     .modal{position:fixed;inset:0;z-index:200;background:rgba(8,4,20,.7);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;}
     .modal.on{display:flex;}
-    .sheet{background:var(--card);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:560px;padding:22px 18px calc(var(--safe-b) + 22px);box-shadow:var(--sh);animation:up .3s;}
+    .sheet{background:var(--card);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:560px;padding:22px 18px calc(var(--safe-b) + 22px);box-shadow:var(--sh);animation:up .3s cubic-bezier(0.34, 1.56, 0.64, 1);}
     @keyframes up{from{transform:translateY(100%);}to{transform:translateY(0);}}
     .sheet h3{font-size:18px;font-weight:900;margin-bottom:4px;}
     .sheet p{font-size:13px;color:var(--tx2);margin-bottom:16px;}
@@ -291,49 +291,47 @@
   <div class="sheet">
     <h3>🔐 Modo administrador</h3>
     <p>Ingresa la clave para gestionar jugadores y cambiar asistencias.</p>
-    <div class="fld"><label>Clave de admin</label><input id="adminKeyInput" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" style="text-align:center;letter-spacing:8px;font-size:22px;"></div>
+    <div class="fld"><label>Clave de admin</label><input id="adminKeyInput" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" style="text-align:center;"></div>
     <button class="btn btn-p" onclick="submitAdmin()">Activar admin</button>
     <button class="btn btn-g" onclick="closeAdmin()">Cancelar</button>
   </div>
 </div>
 
 <script>
-// ── CONFIG ──
+// ── CONFIG (injected from env vars at build time) ──
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRLojC2UzbjyZ-yLZil0MRQFGiMIkuTqhw8hXc';
+const SUPABASE_KEY = '';
 const POOL_ID = 'oraculo';
-const ADMIN_KEY = '2372';      // clave para editar/borrar jugadores (cámbiala si quieres)
+const ADMIN_KEY = '';
 const MIN_PLAYERS = 12;
 const REMEMBER_KEY = 'oraculo_me';
-let isAdminMode = false;        // se activa con la clave de admin
+let isAdminMode = false;
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ──
-let CU = null;               // current user id
-let PLAYERS = [];            // [{id,name,init,cls}]
-let ATT = {};               // {user_id: 'si'|'no'}
-let FECHAS = nextTuesdays(4); // próximos 4 martes (se recalculan cada vez que abres)
-let FECHA = FECHAS[0];        // fecha seleccionada
+let CU = null;
+let PLAYERS = [];
+let ATT = {};
+let FECHAS = nextTuesdays(4);
+let FECHA = FECHAS[0];
 
 // ── helpers ──
 function nextTuesday(){
   const d = new Date();
-  const day = d.getDay();          // 0=dom..2=mar
-  let add = (2 - day + 7) % 7;     // dias hasta martes
-  // si es martes pero ya paso la hora del partido (>21:00) saltar al siguiente
+  const day = d.getDay();
+  let add = (2 - day + 7) % 7;
   if(add===0 && d.getHours()>=21) add = 7;
   d.setDate(d.getDate()+add);
   return d.toISOString().slice(0,10);
 }
 function isoLocal(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function nextTuesdays(n){
-  // "ahora" en hora del Este (EST/EDT), sin importar la zona del teléfono
   const et=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
-  const day=et.getDay();                       // 0=dom .. 2=mar
-  let add=(2-day+7)%7;                          // días hasta el próximo martes
-  if(add===0 && et.getHours()>=21) add=7;       // si ya pasó el partido de hoy (después de 9pm ET)
+  const day=et.getDay();
+  let add=(2-day+7)%7;
+  if(add===0 && et.getHours()>=21) add=7;
   const first=new Date(et.getFullYear(),et.getMonth(),et.getDate()+add);
   const out=[];
   for(let i=0;i<n;i++){ const d=new Date(first.getFullYear(),first.getMonth(),first.getDate()+i*7); out.push(isoLocal(d)); }
@@ -363,7 +361,7 @@ function getPlayer(id){return PLAYERS.find(p=>p.id===id);}
 function isAdmin(){return isAdminMode;}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
 
-// ── LOGIN (sin PIN) ──
+// ── LOGIN ──
 function shake(){ const el=document.getElementById('login'); el.classList.add('shake'); setTimeout(()=>el.classList.remove('shake'),400); }
 
 async function enterApp(){
@@ -395,7 +393,8 @@ async function loginOK(){
   document.getElementById('loadOverlay').classList.add('hide');
   const u=getPlayer(CU);
   document.getElementById('hdrAv').textContent=u?u.init:'··';
-  document.getElementById('askQ').textContent=`Hola ${u?u.name.split(' ')[0]:''} 👋 ¿vas este ${new Date(FECHA+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long'})}?`;
+  const firstName = u ? u.name.split(' ')[0] : '';
+  document.getElementById('askQ').textContent=`Hola ${firstName} 👋 ¿vas este ${new Date(FECHA+'T12:00:00').toLocaleDateString('es-ES',{weekday:'long'})}?`;
   document.getElementById('login').classList.add('out');
   setTimeout(()=>{document.getElementById('login').style.display='none';},420);
   document.getElementById('app').style.display='flex';
@@ -430,7 +429,6 @@ async function setMy(status){
   toast(status==='si'?'✅ ¡Confirmado, nos vemos!':status==='maybe'?'❓ Anotado como tentative':'❌ Registrado, no vas');
 }
 
-// Admin: cambiar la asistencia de cualquier jugador
 async function setFor(uid,status){
   if(!isAdminMode){ toast('🔐 Activa Modo admin'); return; }
   const prev=ATT[uid];
@@ -442,6 +440,13 @@ async function setFor(uid,status){
   if(error){ ATT[uid]=prev; render(); toast('⚠️ No se guardó: '+error.message); return; }
   const p=getPlayer(uid);
   toast('✏️ '+(p?p.name.split(' ')[0]:'')+': '+(status==='si'?'va ✅':status==='maybe'?'tentative ❓':'no va ❌'));
+}
+
+// ── SANITIZE: Prevent XSS by using textContent instead of innerHTML ──
+function sanitizeText(text) {
+  const el = document.createElement('div');
+  el.textContent = text;
+  return el.innerHTML;
 }
 
 function render(){
@@ -466,16 +471,16 @@ function render(){
   document.getElementById('pPe').textContent=pe.length;
 
   const q=document.getElementById('quorum');
-  if(si.length>=MIN_PLAYERS){ q.className='quorum q-full'; q.innerHTML=`✅ ¡Hay equipo! ${si.length}/${MIN_PLAYERS} confirmados<br><span style="font-size:12px;font-weight:700;opacity:.75;">⏳ ${pe.length} sin responder</span>`; }
-  else{ const f=MIN_PLAYERS-si.length; q.className='quorum q-wait'; q.innerHTML=`⚽ Faltan <strong>${f}</strong> para completar equipo<br><span style="font-size:12px;font-weight:700;opacity:.75;">⏳ ${pe.length} sin responder</span>`; }
+  if(si.length>=MIN_PLAYERS){ q.className='quorum q-full'; q.innerHTML=`✅ ¡Hay equipo! ${si.length}/${MIN_PLAYERS} confirmados<br><span style="font-size:12px;font-weight:700;opacity:.75;">⏳ Esperando confirmación final…</span>`; }
+  else{ const f=MIN_PLAYERS-si.length; q.className='quorum q-wait'; q.innerHTML=`⚽ Faltan <strong>${f}</strong> para completar equipo<br><span style="font-size:12px;font-weight:700;opacity:.75;">📢 Pásalo a los que no respondieron</span>`; }
 
   const canDel=(p)=>isAdmin();
-  const delBtn=(p)=>canDel(p)?`<button onclick="removePlayer(${p.id})" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;cursor:pointer;">🗑️</button>`:'';
-  const editBtn=(p)=>isAdmin()?`<button onclick="openEdit(${p.id})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--acc3);border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;cursor:pointer;">✏️</button>`:'';
-  const aBtn=(p,st,emoji,c)=>{const on=ATT[p.id]===st;return `<button onclick="setFor(${p.id},'${st}')" style="background:${on?c:'rgba(255,255,255,.05)'};border:1px solid ${on?c:'var(--line)'};border-radius:8px;padding:4px 8px;font-size:13px;cursor:pointer;">${emoji}</button>`;};
+  const delBtn=(p)=>canDel(p)?`<button onclick="removePlayer(${p.id})" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">🗑️ Eliminar</button>`:`'';
+  const editBtn=(p)=>isAdmin()?`<button onclick="openEdit(${p.id})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--acc3);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Editar</button>`:`''`;
+  const aBtn=(p,st,emoji,c)=>{const on=ATT[p.id]===st;return `<button onclick="setFor(${p.id},'${st}')" style="background:${on?c:'rgba(255,255,255,.05)'};border:1px solid ${on?c:'var(--line)'};border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;color:#fff;">${emoji}</button>`;};
   const statusBtns=(p)=>`<div style="display:flex;gap:4px;">${aBtn(p,'si','✅','rgba(34,197,94,.4)')}${aBtn(p,'maybe','❓','rgba(245,158,11,.4)')}${aBtn(p,'no','❌','rgba(239,68,68,.4)')}</div>`;
   const rowHtml=(p,tag,dim)=>{
-    const nm=`${p.name}${p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':''}`;
+    const nm=sanitizeText(p.name)+(p.id===CU?' <span style="color:var(--acc3);font-size:12px;">(tú)</span>':'');
     if(isAdmin()){
       return `<div class="row row-admin${dim?' dim':''}"><div class="row-top"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${nm}</div></div><div class="row-actions">${statusBtns(p)}${editBtn(p)}${delBtn(p)}</div></div>`;
     }
@@ -549,7 +554,7 @@ async function saveEdit(){
 function toggleMenu(e){ e.stopPropagation(); document.getElementById('menu').classList.toggle('on'); }
 document.addEventListener('click',e=>{ if(!e.target.closest('#hdrAv')&&!e.target.closest('#menu'))document.getElementById('menu').classList.remove('on'); });
 
-// Modo admin: mantener presionado el logo 🔮 (1 seg)
+// Modo admin: hold logo for 1 sec
 (function(){
   const el=document.querySelector('.hdr-l'); if(!el) return;
   let t=null;
@@ -586,7 +591,6 @@ function submitAdmin(){
 (async function(){
   await loadPlayers();
   document.getElementById('loadOverlay').classList.add('hide');
-  // auto-entrar si el celular ya recuerda al jugador
   try{
     const saved=localStorage.getItem(REMEMBER_KEY);
     if(saved!==null && getPlayer(parseInt(saved))){
