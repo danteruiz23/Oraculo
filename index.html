@@ -165,6 +165,36 @@
     .quorum.q-full{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--si);}
     .quorum.q-wait{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);color:#f59e0b;}
 
+    /* armar equipos */
+    .teams-open{width:100%;margin-top:14px;border:none;border-radius:16px;padding:15px;font-size:16px;font-weight:900;cursor:pointer;
+      color:#fff;background:linear-gradient(135deg,#2563eb,var(--acc2));box-shadow:0 8px 24px rgba(124,58,237,.4);letter-spacing:.3px;}
+    #teamsScreen{position:fixed;inset:0;z-index:250;background:var(--bg);display:none;flex-direction:column;}
+    #teamsScreen.on{display:flex;}
+    .ts-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
+      padding:calc(env(safe-area-inset-top,0) + 12px) 14px 12px;background:linear-gradient(120deg,var(--p2),var(--p4));box-shadow:0 4px 16px rgba(0,0,0,.35);}
+    .ts-back{background:rgba(255,255,255,.12);border:none;color:#fff;font-size:15px;font-weight:800;border-radius:12px;padding:8px 12px;cursor:pointer;width:64px;}
+    .ts-title{text-align:center;font-size:17px;font-weight:900;line-height:1.2;}
+    .ts-date{font-size:12px;color:var(--acc3);font-weight:700;text-transform:capitalize;}
+    .ts-body{flex:1;overflow-y:auto;padding:14px 12px calc(var(--safe-b) + 24px);max-width:620px;width:100%;margin:0 auto;}
+    .ts-ctrls{display:flex;gap:10px;margin-bottom:12px;}
+    .ts-btn{flex:1;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:900;cursor:pointer;}
+    .ts-shuffle{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#3a2900;}
+    .ts-clear{background:var(--card2);color:var(--tx2);}
+    .ts-hint{color:var(--tx3);font-size:12px;text-align:center;margin-bottom:12px;}
+    .ts-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .ts-team{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 10px;min-height:120px;}
+    .ts-team.ts-a{border-top:3px solid #e5e7eb;}
+    .ts-team.ts-b{border-top:3px solid #475569;}
+    .ts-team-h{font-size:13px;font-weight:900;text-align:center;margin-bottom:10px;color:var(--tx);}
+    .ts-p{display:flex;align-items:center;gap:8px;background:var(--card2);border-radius:11px;padding:8px 9px;margin-bottom:7px;}
+    .ts-p .ava{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;flex-shrink:0;}
+    .ts-p .nm{flex:1;font-size:13px;font-weight:700;line-height:1.15;}
+    .ts-move{display:flex;gap:4px;margin-top:6px;}
+    .ts-move button{flex:1;border:none;border-radius:7px;padding:5px 0;font-size:12px;font-weight:800;cursor:pointer;background:rgba(255,255,255,.08);color:var(--tx2);}
+    .ts-empty{color:var(--tx3);font-size:12px;text-align:center;padding:14px 4px;}
+    .ts-bench-wrap{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 10px;}
+    .ts-bench-h{font-size:13px;font-weight:900;text-align:center;margin-bottom:10px;color:var(--tx2);}
+
     /* toast */
     #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;color:#1b1140;
       padding:11px 20px;border-radius:22px;font-size:13px;font-weight:800;opacity:0;transition:all .3s;z-index:300;pointer-events:none;white-space:nowrap;box-shadow:var(--sh);}
@@ -248,6 +278,8 @@
 
     <div class="quorum q-wait" id="quorum">⚽ Faltan <strong>10</strong> para completar equipo</div>
 
+    <button class="teams-open" onclick="openTeams()">🆚 Armar equipos · 6 vs 6</button>
+
     <div class="sec-t">✅ Confirmados <span class="pill" id="pSi">0</span></div>
     <div id="listSi"></div>
 
@@ -286,6 +318,36 @@
   </div>
 </div>
 
+<!-- teams screen -->
+<div id="teamsScreen">
+  <div class="ts-hdr">
+    <button class="ts-back" onclick="closeTeams()">‹ Volver</button>
+    <div class="ts-title">🆚 Equipos<br><span id="teamsDate" class="ts-date">—</span></div>
+    <div style="width:64px;"></div>
+  </div>
+  <div class="ts-body">
+    <div id="teamsAdminCtrls" class="ts-ctrls" style="display:none;">
+      <button class="ts-btn ts-shuffle" onclick="sortearEquipos()">🎲 Sortear 6 vs 6</button>
+      <button class="ts-btn ts-clear" onclick="limpiarEquipos()">🧹 Limpiar</button>
+    </div>
+    <div id="teamsHint" class="ts-hint"></div>
+    <div class="ts-cols">
+      <div class="ts-team ts-a">
+        <div class="ts-team-h">⚪ Equipo A <span id="cntA">0</span>/6</div>
+        <div id="teamA"></div>
+      </div>
+      <div class="ts-team ts-b">
+        <div class="ts-team-h">⚫ Equipo B <span id="cntB">0</span>/6</div>
+        <div id="teamB"></div>
+      </div>
+    </div>
+    <div class="ts-bench-wrap">
+      <div class="ts-bench-h">🪑 Sin asignar <span id="cntBench">0</span></div>
+      <div id="teamBench"></div>
+    </div>
+  </div>
+</div>
+
 <!-- admin modal -->
 <div class="modal" id="adminModal" onclick="if(event.target===this)closeAdmin()">
   <div class="sheet">
@@ -311,11 +373,13 @@ const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ──
-let CU = null;
-let PLAYERS = [];
-let ATT = {};
-let FECHAS = nextTuesdays(4);
-let FECHA = FECHAS[0];
+let CU = null;               // current user id
+let PLAYERS = [];            // [{id,name,init,cls}]
+let ATT = {};               // {user_id: 'si'|'no'}
+let TEAMS = {};             // {user_id: 'A'|'B'}
+let teamsOpen = false;
+let FECHAS = nextTuesdays(4); // próximos 4 martes (se recalculan cada vez que abres)
+let FECHA = FECHAS[0];        // fecha seleccionada
 
 // ── helpers ──
 function nextTuesday(){
@@ -347,9 +411,11 @@ async function changeFecha(iso){
   sb.removeAllChannels();
   document.getElementById('loadOverlay').classList.remove('hide');
   await loadAttendance();
+  await loadTeams();
   document.getElementById('loadOverlay').classList.add('hide');
   subscribe();
   render();
+  if(teamsOpen) renderTeams();
 }
 function fechaLabel(iso){
   const [y,m,dd]=iso.split('-').map(Number);
@@ -490,13 +556,85 @@ function render(){
   document.getElementById('listMaybe').innerHTML=maybe.length?maybe.map(p=>rowHtml(p,'❓',false)).join(''):'<div class="empty">—</div>';
   document.getElementById('listNo').innerHTML=no.length?no.map(p=>rowHtml(p,'❌',false)).join(''):'<div class="empty">—</div>';
   document.getElementById('listPe').innerHTML=pe.length?pe.map(p=>rowHtml(p,'⏳',true)).join(''):'<div class="empty">Todos respondieron 🎉</div>';
+  if(teamsOpen) renderTeams();
+}
+
+// ── ARMAR EQUIPOS ──
+async function loadTeams(){
+  const {data,error}=await sb.from('teams').select('user_id,team').eq('pool',POOL_ID).eq('fecha',FECHA);
+  TEAMS={};
+  if(!error && data) data.forEach(r=>{TEAMS[r.user_id]=r.team;});
+}
+async function openTeams(){
+  teamsOpen=true;
+  document.getElementById('teamsScreen').classList.add('on');
+  await loadTeams();
+  renderTeams();
+}
+function closeTeams(){ teamsOpen=false; document.getElementById('teamsScreen').classList.remove('on'); }
+
+function renderTeams(){
+  document.getElementById('teamsDate').textContent=fechaLabel(FECHA);
+  document.getElementById('teamsAdminCtrls').style.display=isAdminMode?'flex':'none';
+  const confirmed=PLAYERS.filter(p=>ATT[p.id]==='si');
+  const A=[],B=[],bench=[];
+  confirmed.forEach(p=>{ const t=TEAMS[p.id]; if(t==='A')A.push(p); else if(t==='B')B.push(p); else bench.push(p); });
+  document.getElementById('cntA').textContent=A.length;
+  document.getElementById('cntB').textContent=B.length;
+  document.getElementById('cntBench').textContent=bench.length;
+  const moveCtrls=(p)=>isAdminMode?`<div class="ts-move"><button onclick="setTeam(${p.id},'A')">A</button><button onclick="setTeam(${p.id},'B')">B</button><button onclick="setTeam(${p.id},null)">—</button></div>`:'';
+  const pHtml=(p)=>`<div class="ts-p" style="${isAdminMode?'flex-direction:column;align-items:stretch;':''}"><div style="display:flex;align-items:center;gap:8px;"><div class="ava ${p.cls}">${p.init}</div><div class="nm">${p.name}</div></div>${moveCtrls(p)}</div>`;
+  document.getElementById('teamA').innerHTML=A.length?A.map(pHtml).join(''):'<div class="ts-empty">—</div>';
+  document.getElementById('teamB').innerHTML=B.length?B.map(pHtml).join(''):'<div class="ts-empty">—</div>';
+  document.getElementById('teamBench').innerHTML=bench.length?bench.map(pHtml).join(''):'<div class="ts-empty">Todos asignados 🎉</div>';
+  const hint=document.getElementById('teamsHint');
+  if(!isAdminMode) hint.textContent='👀 Solo lectura — activa Modo admin para sortear o mover.';
+  else hint.textContent=confirmed.length+' confirmados · '+A.length+' vs '+B.length+(bench.length?(' · '+bench.length+' en banca'):'');
+}
+
+async function sortearEquipos(){
+  if(!isAdminMode){ toast('🔐 Activa Modo admin'); return; }
+  const confirmed=PLAYERS.filter(p=>ATT[p.id]==='si');
+  if(confirmed.length<2){ toast('⚠️ Necesitas al menos 2 confirmados'); return; }
+  const shuffled=[...confirmed].sort(()=>Math.random()-0.5);
+  const assign={}; let a=0,b=0;
+  for(const p of shuffled){
+    if(a<6 && a<=b){ assign[p.id]='A'; a++; }
+    else if(b<6){ assign[p.id]='B'; b++; }
+    else if(a<6){ assign[p.id]='A'; a++; }
+    // resto: banca
+  }
+  TEAMS=assign; renderTeams();
+  await sb.from('teams').delete().eq('pool',POOL_ID).eq('fecha',FECHA);
+  const rows=Object.keys(assign).map(uid=>({pool:POOL_ID,fecha:FECHA,user_id:parseInt(uid),team:assign[uid]}));
+  if(rows.length){ const {error}=await sb.from('teams').insert(rows); if(error){ toast('⚠️ '+error.message); return; } }
+  toast('🎲 ¡Equipos sorteados!');
+}
+
+async function limpiarEquipos(){
+  if(!isAdminMode){ toast('🔐 Activa Modo admin'); return; }
+  TEAMS={}; renderTeams();
+  const {error}=await sb.from('teams').delete().eq('pool',POOL_ID).eq('fecha',FECHA);
+  if(error){ toast('⚠️ '+error.message); return; }
+  toast('🧹 Equipos limpiados');
+}
+
+async function setTeam(uid,team){
+  if(!isAdminMode){ toast('🔐 Activa Modo admin'); return; }
+  if(team===null){ delete TEAMS[uid]; renderTeams(); await sb.from('teams').delete().eq('pool',POOL_ID).eq('fecha',FECHA).eq('user_id',uid); return; }
+  const count=Object.values(TEAMS).filter(t=>t===team).length - (TEAMS[uid]===team?1:0);
+  if(count>=6){ toast('⚠️ Equipo '+team+' ya tiene 6'); return; }
+  TEAMS[uid]=team; renderTeams();
+  const {error}=await sb.from('teams').upsert({pool:POOL_ID,fecha:FECHA,user_id:uid,team,updated_at:new Date().toISOString()},{onConflict:'pool,fecha,user_id'});
+  if(error) toast('⚠️ '+error.message);
 }
 
 // ── REALTIME ──
 function subscribe(){
   sb.channel('att-'+FECHA)
-    .on('postgres_changes',{event:'*',schema:'public',table:'attendance',filter:`fecha=eq.${FECHA}`},async()=>{ await loadAttendance(); render(); })
-    .on('postgres_changes',{event:'*',schema:'public',table:'participants'},async()=>{ await loadPlayers(); render(); })
+    .on('postgres_changes',{event:'*',schema:'public',table:'attendance',filter:`fecha=eq.${FECHA}`},async()=>{ await loadAttendance(); render(); if(teamsOpen) renderTeams(); })
+    .on('postgres_changes',{event:'*',schema:'public',table:'teams',filter:`fecha=eq.${FECHA}`},async()=>{ await loadTeams(); if(teamsOpen) renderTeams(); })
+    .on('postgres_changes',{event:'*',schema:'public',table:'participants'},async()=>{ await loadPlayers(); render(); if(teamsOpen) renderTeams(); })
     .subscribe();
 }
 
