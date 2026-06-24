@@ -233,6 +233,23 @@
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     .live{display:inline-block;width:7px;height:7px;background:var(--si);border-radius:50%;margin-right:5px;animation:bl 1.2s infinite;}
     @keyframes bl{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+    /* ── PWA FLOATING INSTALL BUTTON ── */
+    .pwa-install-btn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);
+      z-index:300;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:30px;
+      padding:13px 22px;font-size:15px;font-weight:900;box-shadow:0 8px 24px rgba(124,58,237,.5);cursor:pointer;}
+    .pwa-ios{position:fixed;inset:0;z-index:400;background:rgba(8,4,20,.72);backdrop-filter:blur(4px);
+      display:none;align-items:flex-end;justify-content:center;}
+    .pwa-ios.on{display:flex;}
+    .pwa-ios-card{background:#1b1140;color:#ede9fe;width:100%;max-width:480px;border-top-left-radius:24px;border-top-right-radius:24px;
+      padding:22px 20px calc(env(safe-area-inset-bottom,0px) + 22px);box-shadow:0 -8px 30px rgba(0,0,0,.5);}
+    .pwa-ios-title{font-size:18px;font-weight:900;margin-bottom:14px;text-align:center;}
+    .pwa-ios-steps{margin:0 0 16px 18px;font-size:15px;line-height:1.9;}
+    .pwa-share{display:inline-block;background:#2563eb;color:#fff;border-radius:6px;padding:0 6px;}
+    .pwa-ok{width:100%;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:800;
+      background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;cursor:pointer;}
+    .pwa-arrow{text-align:center;color:#b9aee0;font-size:13px;font-weight:700;margin-top:14px;animation:pwaB 1.4s infinite;}
+    @keyframes pwaB{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
   </style>
 </head>
 <body>
@@ -1079,6 +1096,41 @@ async function triggerNativeInstall(){
 }
 
 updateInstallUI();
+
+// ── PWA FLOATING BUTTON ──
+function pwaIsIOS(){ return IS_IOS; }
+function pwaStandalone(){ return IS_STANDALONE; }
+async function pwaInstall(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    const{outcome}=await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+    if(outcome==='accepted'){const b=document.getElementById('pwaInstallBtn');if(b)b.style.display='none';}
+    return;
+  }
+  if(pwaIsIOS()){document.getElementById('iosGuide').classList.add('on');return;}
+  openInstallModal();
+}
+window.addEventListener('load',function(){
+  if(!pwaStandalone()&&pwaIsIOS()){const b=document.getElementById('pwaInstallBtn');if(b)b.style.display='block';}
+});
 </script>
+
+<!-- Botón instalar flotante (se muestra solo cuando aplica) -->
+<button id="pwaInstallBtn" class="pwa-install-btn" style="display:none" onclick="pwaInstall()">📲 Instalar Oráculo</button>
+
+<!-- Guía para iPhone -->
+<div id="iosGuide" class="pwa-ios" onclick="if(event.target===this)this.classList.remove('on')">
+  <div class="pwa-ios-card">
+    <div class="pwa-ios-title">📲 Instalar en tu iPhone</div>
+    <ol class="pwa-ios-steps">
+      <li>Toca <b>Compartir</b> <span class="pwa-share">⬆️</span> (barra de Safari).</li>
+      <li>Desliza y elige <b>"Añadir a pantalla de inicio"</b>.</li>
+      <li>Toca <b>Añadir</b> — ¡listo, queda el icono 🔮!</li>
+    </ol>
+    <button class="pwa-ok" onclick="document.getElementById('iosGuide').classList.remove('on')">Entendido</button>
+    <div class="pwa-arrow">⬇️ El botón Compartir está aquí abajo</div>
+  </div>
+</div>
 </body>
 </html>
