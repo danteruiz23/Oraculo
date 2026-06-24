@@ -466,14 +466,40 @@ async function changeFecha(iso){
   if(teamsOpen) renderTeams();
 }
 function scoreSettingsKey(){ return 'score_'+FECHA; }
+function scoreLocalKey(){ return 'oraculo_score_'+FECHA; }
+function parseMatchScore(raw){
+  if(!raw) return null;
+  try{
+    const j=typeof raw==='string'?JSON.parse(raw):raw;
+    if(Number.isFinite(j.a)&&Number.isFinite(j.b)&&j.a>=0&&j.b>=0) return {a:j.a,b:j.b};
+  }catch(e){}
+  return null;
+}
 async function loadMatchScore(){
   MATCH_SCORE=null;
+  const local=parseMatchScore(localStorage.getItem(scoreLocalKey()));
+  if(local) MATCH_SCORE=local;
   try{
     const {data,error}=await sb.from('settings').select('value').eq('pool',POOL_ID).eq('key',scoreSettingsKey()).maybeSingle();
-    if(error||!data?.value) return;
-    const j=JSON.parse(data.value);
-    if(Number.isFinite(j.a)&&Number.isFinite(j.b)&&j.a>=0&&j.b>=0) MATCH_SCORE={a:j.a,b:j.b};
-  }catch(e){}
+    if(error){
+      console.warn('[score] Supabase:', error.message);
+      return;
+    }
+    const cloud=parseMatchScore(data?.value);
+    if(cloud){
+      MATCH_SCORE=cloud;
+      localStorage.setItem(scoreLocalKey(), JSON.stringify(cloud));
+    }
+  }catch(e){ console.warn('[score load]', e); }
+}
+function formatScoreDisplay(){
+  if(!MATCH_SCORE) return null;
+  const {a,b}=MATCH_SCORE;
+  const nameA=sanitizeText(TEAM_NAMES.A);
+  const nameB=sanitizeText(TEAM_NAMES.B);
+  if(a===b) return `<span class="draw">${nameA} ${a} – ${b} ${nameB}</span>`;
+  if(a>b) return `<span class="win">${nameA} ${a}</span> – ${b} <span>${nameB}</span>`;
+  return `<span>${nameA} ${a}</span> – <span class="win">${b} ${nameB}</span>`;
 }
 function fechaLabel(iso){
   const [y,m,dd]=iso.split('-').map(Number);
@@ -677,9 +703,12 @@ function renderScoreBox(){
   const edit=document.getElementById('tsScoreEdit');
   const clearBtn=document.getElementById('tsScoreClearBtn');
   if(!disp||!edit) return;
+  const html=formatScoreDisplay();
   if(isAdminMode){
-    disp.style.display='none';
+    disp.style.display='block';
     edit.style.display='flex';
+    disp.innerHTML=html||'Sin marcador guardado';
+    disp.className='ts-score-display';
     const ia=document.getElementById('scoreA');
     const ib=document.getElementById('scoreB');
     if(ia) ia.value=MATCH_SCORE?MATCH_SCORE.a:'';
@@ -688,21 +717,12 @@ function renderScoreBox(){
   } else {
     edit.style.display='none';
     disp.style.display='block';
-    if(!MATCH_SCORE){
+    if(!html){
       disp.textContent='Sin marcador final';
       disp.className='ts-score-display';
       return;
     }
-    const {a,b}=MATCH_SCORE;
-    const nameA=sanitizeText(TEAM_NAMES.A);
-    const nameB=sanitizeText(TEAM_NAMES.B);
-    if(a===b){
-      disp.innerHTML=`<span class="draw">${nameA} ${a} – ${b} ${nameB}</span>`;
-    } else if(a>b){
-      disp.innerHTML=`<span class="win">${nameA} ${a}</span> – ${b} <span>${nameB}</span>`;
-    } else {
-      disp.innerHTML=`<span>${nameA} ${a}</span> – <span class="win">${b} ${nameB}</span>`;
-    }
+    disp.innerHTML=html;
     disp.className='ts-score-display';
   }
 }
@@ -715,13 +735,19 @@ async function saveMatchScore(){
     toast('⚠️ Marcador inválido (0–30)'); return;
   }
   MATCH_SCORE={a,b};
+  const payload=JSON.stringify({a,b});
+  localStorage.setItem(scoreLocalKey(), payload);
   const {error}=await sb.from('settings').upsert(
-    {pool:POOL_ID,key:scoreSettingsKey(),value:JSON.stringify({a,b}),updated_at:new Date().toISOString()},
+    {pool:POOL_ID,key:scoreSettingsKey(),value:payload,updated_at:new Date().toISOString()},
     {onConflict:'pool,key'}
   );
-  if(error){ toast('⚠️ No se guardó: '+error.message); return; }
   renderTeams();
   render();
+  if(error){
+    console.warn('[score save]', error.message);
+    toast('✅ Marcador guardado en este teléfono (sync nube pendiente)');
+    return;
+  }
   toast('✅ Marcador guardado');
 }
 
@@ -729,8 +755,9 @@ async function clearMatchScore(){
   if(!isAdminMode){ toast('🔐 Activa Modo admin'); return; }
   if(!MATCH_SCORE){ return; }
   if(!confirm('¿Borrar el marcador de este martes?')) return;
+  localStorage.removeItem(scoreLocalKey());
   const {error}=await sb.from('settings').delete().eq('pool',POOL_ID).eq('key',scoreSettingsKey());
-  if(error){ toast('⚠️ '+error.message); return; }
+  if(error) console.warn('[score delete]', error.message);
   MATCH_SCORE=null;
   renderTeams();
   render();
