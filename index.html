@@ -197,7 +197,12 @@
     .ts-team{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 10px;min-height:120px;}
     .ts-team.ts-a{border-top:3px solid #e5e7eb;}
     .ts-team.ts-b{border-top:3px solid #475569;}
-    .ts-team-h{font-size:13px;font-weight:900;text-align:center;margin-bottom:10px;color:var(--tx);}
+    .ts-team-h{font-size:13px;font-weight:900;text-align:center;margin-bottom:4px;color:var(--tx);}
+    .ts-team-score{text-align:center;font-size:34px;font-weight:900;line-height:1;color:var(--gold);
+      margin:2px 0 12px;letter-spacing:-1px;text-shadow:0 2px 14px rgba(251,191,36,.35);}
+    .ts-team-score.empty{display:none;}
+    .ts-team-score.ts-score-win{color:#fde047;text-shadow:0 0 18px rgba(253,224,71,.45);}
+    .ts-team-score.ts-score-lose{color:#d97706;opacity:.85;}
     .ts-p{display:flex;align-items:center;gap:8px;background:var(--card2);border-radius:11px;padding:8px 9px;margin-bottom:7px;}
     .ts-p .ava{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;flex-shrink:0;}
     .ts-p .nm{flex:1;font-size:13px;font-weight:700;line-height:1.15;}
@@ -358,10 +363,12 @@
     <div class="ts-cols">
       <div class="ts-team ts-a">
         <div class="ts-team-h">⚪ <span id="labelA">Equipo A</span> <span id="cntA">0</span>/6 <button id="editA" onclick="editTeamName('A')" style="display:none;background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;">✏️</button></div>
+        <div id="scoreColA" class="ts-team-score empty"></div>
         <div id="teamA"></div>
       </div>
       <div class="ts-team ts-b">
         <div class="ts-team-h">⚫ <span id="labelB">Equipo B</span> <span id="cntB">0</span>/6 <button id="editB" onclick="editTeamName('B')" style="display:none;background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;">✏️</button></div>
+        <div id="scoreColB" class="ts-team-score empty"></div>
         <div id="teamB"></div>
       </div>
     </div>
@@ -385,7 +392,7 @@
 
 <script>
 (function(){
-  var VER='oraculo-v8';
+  var VER='oraculo-v9';
   if(localStorage.getItem('__oraculo_ver')!==VER){
     localStorage.setItem('__oraculo_ver',VER);
     if('serviceWorker' in navigator){
@@ -400,7 +407,7 @@
   }
 })();
 // ── CONFIG ──
-const APP_VERSION = 'oraculo-v8';
+const APP_VERSION = 'oraculo-v9';
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRL3W0W9U1X0UsmA_rj2g_qEHfZ5LlcN0GYLho';
 const POOL_ID = 'oraculo';
@@ -717,17 +724,33 @@ function renderTeams(){
   renderScoreBox();
 }
 
+function updateTeamColumnScores(){
+  const ca=document.getElementById('scoreColA');
+  const cb=document.getElementById('scoreColB');
+  if(!ca||!cb) return;
+  if(!MATCH_SCORE){
+    ca.textContent=cb.textContent='';
+    ca.className=cb.className='ts-team-score empty';
+    return;
+  }
+  const {a,b}=MATCH_SCORE;
+  ca.textContent=a;
+  cb.textContent=b;
+  ca.className='ts-team-score'+(a>b?' ts-score-win':a<b?' ts-score-lose':'');
+  cb.className='ts-team-score'+(b>a?' ts-score-win':b<a?' ts-score-lose':'');
+}
+
 function renderScoreBox(){
+  updateTeamColumnScores();
   const disp=document.getElementById('tsScoreDisplay');
   const edit=document.getElementById('tsScoreEdit');
   const clearBtn=document.getElementById('tsScoreClearBtn');
+  const box=document.getElementById('tsScoreBox');
   if(!disp||!edit) return;
-  const html=formatScoreDisplay();
   if(isAdminMode){
-    disp.style.display='block';
+    if(box) box.style.display='block';
+    disp.style.display='none';
     edit.style.display='flex';
-    disp.innerHTML=html||'Sin marcador guardado';
-    disp.className='ts-score-display';
     const ia=document.getElementById('scoreA');
     const ib=document.getElementById('scoreB');
     if(ia) ia.value=MATCH_SCORE?MATCH_SCORE.a:'';
@@ -735,14 +758,12 @@ function renderScoreBox(){
     if(clearBtn) clearBtn.style.display=MATCH_SCORE?'block':'none';
   } else {
     edit.style.display='none';
-    disp.style.display='block';
-    if(!html){
+    disp.style.display='none';
+    if(box) box.style.display=MATCH_SCORE?'none':'block';
+    if(!MATCH_SCORE){
       disp.textContent='Sin marcador final';
       disp.className='ts-score-display';
-      return;
     }
-    disp.innerHTML=html;
-    disp.className='ts-score-display';
   }
 }
 
