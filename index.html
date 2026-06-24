@@ -417,13 +417,17 @@ function nextTuesday(){
   return isoLocal(d);
 }
 function isoLocal(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-/** Próximos martes: hoy si es martes (todo el día, p. ej. marcador); si no, el próximo + siguientes. */
+/** Martes en curso solo el día martes (hasta 23:59 ET). Desde miércoles 00:00 → próximo martes. */
 function nextTuesdays(n){
   const et=nowET();
   const day=et.getDay();
-  let add=(2-day+7)%7;
-  if(day===2) add=0;
-  const first=new Date(et.getFullYear(),et.getMonth(),et.getDate()+add);
+  let first;
+  if(day===2){
+    first=new Date(et.getFullYear(),et.getMonth(),et.getDate());
+  } else {
+    const add=(2-day+7)%7;
+    first=new Date(et.getFullYear(),et.getMonth(),et.getDate()+add);
+  }
   const out=[];
   for(let i=0;i<n;i++){
     const d=new Date(first.getFullYear(),first.getMonth(),first.getDate()+i*7);
@@ -432,14 +436,19 @@ function nextTuesdays(n){
   return out;
 }
 function refreshFechas(){
+  const prev=FECHA;
   FECHAS=nextTuesdays(4);
   if(!FECHAS.includes(FECHA)) FECHA=FECHAS[0];
+  buildFechaSelect();
+  return prev!==FECHA;
 }
 function buildFechaSelect(){
   const sel=document.getElementById('fechaSel');
-  const todayIso=isoLocal(nowET());
+  if(!sel) return;
+  const et=nowET();
+  const todayIso=isoLocal(et);
   sel.innerHTML=FECHAS.map((iso,i)=>{
-    const tag=iso===todayIso?'📅 Hoy · ':i===0?'➡️ ':'';
+    const tag=(et.getDay()===2 && iso===todayIso)?'📅 Hoy · ':i===0?'➡️ ':'';
     return `<option value="${iso}">${tag}${fechaLabel(iso)}</option>`;
   }).join('');
   sel.value=FECHA;
@@ -864,6 +873,19 @@ function submitAdmin(){
   if(k===ADMIN_KEY){ isAdminMode=true; closeAdmin(); render(); toast('🔐 Modo admin activado'); }
   else toast('❌ Clave incorrecta');
 }
+
+// Al volver a la app tras medianoche, actualizar fechas (martes pasado desaparece)
+document.addEventListener('visibilitychange', async ()=>{
+  if(document.hidden || CU===null) return;
+  const changed=refreshFechas();
+  if(!changed) return;
+  sb.removeAllChannels();
+  await loadAttendance();
+  await loadTeams();
+  await loadMatchScore();
+  subscribe();
+  render();
+});
 
 // ── INIT ──
 (async function(){
