@@ -405,28 +405,43 @@ let FECHAS = nextTuesdays(4); // próximos 4 martes (se recalculan cada vez que 
 let FECHA = FECHAS[0];        // fecha seleccionada
 
 // ── helpers ──
-function nextTuesday(){
-  const d = new Date();
-  const day = d.getDay();
-  let add = (2 - day + 7) % 7;
-  if(add===0 && d.getHours()>=21) add = 7;
-  d.setDate(d.getDate()+add);
-  return d.toISOString().slice(0,10);
+function nowET(){
+  return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
 }
-function isoLocal(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-function nextTuesdays(n){
-  const et=new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
+function nextTuesday(){
+  const et=nowET();
   const day=et.getDay();
   let add=(2-day+7)%7;
-  if(add===0 && et.getHours()>=21) add=7;
+  if(day===2) add=0;
+  const d=new Date(et.getFullYear(),et.getMonth(),et.getDate()+add);
+  return isoLocal(d);
+}
+function isoLocal(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+/** Próximos martes: hoy si es martes (todo el día, p. ej. marcador); si no, el próximo + siguientes. */
+function nextTuesdays(n){
+  const et=nowET();
+  const day=et.getDay();
+  let add=(2-day+7)%7;
+  if(day===2) add=0;
   const first=new Date(et.getFullYear(),et.getMonth(),et.getDate()+add);
   const out=[];
-  for(let i=0;i<n;i++){ const d=new Date(first.getFullYear(),first.getMonth(),first.getDate()+i*7); out.push(isoLocal(d)); }
+  for(let i=0;i<n;i++){
+    const d=new Date(first.getFullYear(),first.getMonth(),first.getDate()+i*7);
+    out.push(isoLocal(d));
+  }
   return out;
+}
+function refreshFechas(){
+  FECHAS=nextTuesdays(4);
+  if(!FECHAS.includes(FECHA)) FECHA=FECHAS[0];
 }
 function buildFechaSelect(){
   const sel=document.getElementById('fechaSel');
-  sel.innerHTML=FECHAS.map((iso,i)=>`<option value="${iso}">${i===0?'➡️ ':''}${fechaLabel(iso)}</option>`).join('');
+  const todayIso=isoLocal(nowET());
+  sel.innerHTML=FECHAS.map((iso,i)=>{
+    const tag=iso===todayIso?'📅 Hoy · ':i===0?'➡️ ':'';
+    return `<option value="${iso}">${tag}${fechaLabel(iso)}</option>`;
+  }).join('');
   sel.value=FECHA;
 }
 async function changeFecha(iso){
@@ -489,6 +504,7 @@ async function loadAttendance(){
 
 async function loginOK(){
   document.getElementById('loadOverlay').classList.remove('hide');
+  refreshFechas();
   await loadAttendance();
   await loadMatchScore();
   document.getElementById('loadOverlay').classList.add('hide');
@@ -852,6 +868,7 @@ function submitAdmin(){
 // ── INIT ──
 (async function(){
   await loadPlayers();
+  refreshFechas();
   document.getElementById('loadOverlay').classList.add('hide');
   try{
     const saved=localStorage.getItem(REMEMBER_KEY);
