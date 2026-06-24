@@ -7,22 +7,21 @@ let html = fs.readFileSync(htmlPath, 'utf-8');
 
 // Inject environment variables
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://cqinovwhmhjsrtwdnjis.supabase.co';
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 const adminKey = process.env.VITE_ADMIN_KEY || '2372';
 
-if (!supabaseKey) {
-  console.warn('⚠️  WARNING: VITE_SUPABASE_ANON_KEY is not set. Using placeholder.');
-}
-
-// Replace placeholders in the HTML
+// Replace placeholders in the HTML (keep baked-in key if env not set)
 html = html.replace(
   /const SUPABASE_URL = '[^']*'/,
   `const SUPABASE_URL = '${supabaseUrl}'`
 );
-html = html.replace(
-  /const SUPABASE_KEY = '[^']*'/,
-  `const SUPABASE_KEY = '${supabaseKey}'`
-);
+if (process.env.VITE_SUPABASE_ANON_KEY) {
+  html = html.replace(
+    /const SUPABASE_KEY = '[^']*'/,
+    `const SUPABASE_KEY = '${process.env.VITE_SUPABASE_ANON_KEY}'`
+  );
+} else {
+  console.warn('⚠️  VITE_SUPABASE_ANON_KEY not set — keeping key from index.html');
+}
 html = html.replace(
   /const ADMIN_KEY = '[^']*'/,
   `const ADMIN_KEY = '${adminKey}'`

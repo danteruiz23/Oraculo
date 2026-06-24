@@ -7,9 +7,10 @@
   <meta name="theme-color" content="#1a103d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Oraculo">
+  <meta name="apple-mobile-web-app-title" content="Oráculo">
+  <meta name="description" content="Oráculo · confirmación de asistencia al fútbol sala de los martes (no es ScoreMaster).">
   <link rel="manifest" href="manifest.json">
-  <title>Oraculo · Soccerland Opalocka</title>
+  <title>Oráculo · Fútbol Sala Martes</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -50,6 +51,7 @@
     .lg-orb{font-size:54px;filter:drop-shadow(0 6px 18px rgba(168,85,247,.6));}
     .lg-title{font-size:34px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,var(--acc3),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
     .lg-sub{font-size:18px;color:var(--tx2);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;}
+    .lg-url{font-size:11px;color:var(--tx3);margin-top:10px;letter-spacing:.3px;}
     .lg-event{font-size:16px;color:var(--gold);font-weight:800;margin-top:12px;}
     .lg-card{background:rgba(27,17,64,.7);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r);padding:20px 18px;box-shadow:var(--sh);}
     .lg-sel-wrap{position:relative;margin-bottom:16px;}
@@ -223,9 +225,10 @@
   <div class="lg-wrap">
     <div class="lg-brand">
       <div class="lg-orb">🔮</div>
-      <div class="lg-title">Oraculo</div>
-      <div class="lg-sub">Soccerland Opalocka</div>
-      <div class="lg-event">⚽ Martes · 7:30–8:30 PM</div>
+      <div class="lg-title">Oráculo</div>
+      <div class="lg-sub">Fútbol Sala · Martes</div>
+      <div class="lg-event">⚽ 7:30–8:30 PM · Opalocka</div>
+      <div class="lg-url">oraculo-futbol-sala.vercel.app</div>
     </div>
     <div class="lg-card">
       <div class="lg-sel-wrap">
@@ -245,8 +248,8 @@
     <div class="hdr-l">
       <div class="hdr-orb">🔮</div>
       <div>
-        <div class="hdr-t">Oraculo</div>
-        <div class="hdr-s"><span class="live"></span>Soccerland Opalocka</div>
+        <div class="hdr-t">Oráculo</div>
+        <div class="hdr-s"><span class="live"></span>Fútbol Sala · Martes</div>
       </div>
     </div>
     <div class="av" id="hdrAv" onclick="toggleMenu(event)">DR</div>
@@ -381,7 +384,23 @@
 </div>
 
 <script>
+(function(){
+  var VER='oraculo-v8';
+  if(localStorage.getItem('__oraculo_ver')!==VER){
+    localStorage.setItem('__oraculo_ver',VER);
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations().then(function(rs){
+        rs.forEach(function(r){r.unregister();});
+        caches.keys().then(function(ks){
+          ks.forEach(function(k){caches.delete(k);});
+          setTimeout(function(){location.reload();},300);
+        });
+      });
+    }
+  }
+})();
 // ── CONFIG ──
+const APP_VERSION = 'oraculo-v8';
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRL3W0W9U1X0UsmA_rj2g_qEHfZ5LlcN0GYLho';
 const POOL_ID = 'oraculo';
