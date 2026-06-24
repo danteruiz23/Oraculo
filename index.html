@@ -75,8 +75,10 @@
     .shake{animation:shk .4s;}
     @keyframes shk{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-9px);}40%,80%{transform:translateX(9px);}}
     .lg-foot{text-align:center;font-size:11px;color:var(--tx3);margin-top:16px;line-height:1.6;}
-    .lg-install{width:100%;margin-top:12px;border:1.5px solid rgba(251,191,36,.45);border-radius:14px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;
-      color:var(--gold);background:rgba(251,191,36,.08);}
+    .lg-install{width:100%;margin-top:12px;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:900;cursor:pointer;
+      color:#3a2900;background:linear-gradient(135deg,var(--gold),#f59e0b);box-shadow:0 6px 20px rgba(251,191,36,.35);
+      -webkit-appearance:none;appearance:none;touch-action:manipulation;}
+    .lg-install:active{transform:scale(.98);filter:brightness(1.05);}
     .lg-install.hide{display:none;}
 
     /* ── APP ── */
@@ -253,7 +255,7 @@
       </div>
       <div class="lg-err" id="lgErr"></div>
       <button class="btn btn-p" onclick="enterApp()">Entrar ⚽</button>
-      <button class="lg-install" id="installBtnLogin" onclick="openInstallModal()">📲 Instalar en tu teléfono</button>
+      <button type="button" class="lg-install" id="installBtnLogin" onclick="openInstallModal()">📲 Instalar en tu teléfono</button>
       <div class="lg-foot">Elige tu nombre y entra — sin PIN.</div>
     </div>
   </div>
@@ -407,7 +409,7 @@
     </div>
     <div id="installAndroid" style="display:none;">
       <p id="installAndroidHint" class="install-note">En Chrome puedes instalar con un toque:</p>
-      <button class="btn btn-p install-android-btn" id="installAndroidBtn" onclick="triggerNativeInstall()">Instalar aplicación</button>
+      <button type="button" class="btn btn-p install-android-btn" id="installAndroidBtn" onclick="triggerNativeInstall()">Instalar aplicación</button>
       <ol class="install-steps" id="installAndroidSteps">
         <li>Abre en <b>Chrome</b>.</li>
         <li>Menú <b>⋮</b> → <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>.</li>
@@ -431,7 +433,7 @@
 
 <script>
 (function(){
-  var VER='oraculo-v11';
+  var VER='oraculo-v12';
   if(localStorage.getItem('__oraculo_ver')!==VER){
     localStorage.setItem('__oraculo_ver',VER);
     if('serviceWorker' in navigator){
@@ -446,7 +448,7 @@
   }
 })();
 // ── CONFIG ──
-const APP_VERSION = 'oraculo-v11';
+const APP_VERSION = 'oraculo-v12';
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRL3W0W9U1X0UsmA_rj2g_qEHfZ5LlcN0GYLho';
 const POOL_ID = 'oraculo';
@@ -1043,11 +1045,14 @@ function openInstallModal(){
   const nativeBtn=document.getElementById('installAndroidBtn');
   const steps=document.getElementById('installAndroidSteps');
   const hint=document.getElementById('installAndroidHint');
-  if(!IS_IOS&&nativeBtn){
+  if(!IS_IOS&&nativeBtn&&steps&&hint){
     const canNative=!!deferredInstallPrompt;
-    nativeBtn.style.display=canNative?'block':'none';
-    if(steps) steps.style.display=canNative?'none':'block';
-    if(hint) hint.textContent=canNative?'Chrome te permite instalar con un toque:':'En Chrome: menú ⋮ → Instalar aplicación.';
+    nativeBtn.style.display='block';
+    nativeBtn.style.opacity=canNative?'1':'0.7';
+    steps.style.display='block';
+    hint.textContent=canNative
+      ? 'Paso 1: toca el botón verde. Si no funciona, usa los pasos de abajo.'
+      : 'Sigue estos pasos en Chrome:';
   }
   document.getElementById('installModal').classList.add('on');
 }
@@ -1057,7 +1062,10 @@ function closeInstallModal(){
 }
 
 async function triggerNativeInstall(){
-  if(!deferredInstallPrompt){ openInstallModal(); return; }
+  if(!deferredInstallPrompt){
+    toast('Menú ⋮ → Instalar aplicación');
+    return;
+  }
   deferredInstallPrompt.prompt();
   const {outcome}=await deferredInstallPrompt.userChoice;
   deferredInstallPrompt=null;
