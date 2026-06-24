@@ -253,7 +253,7 @@
       </div>
       <div class="lg-err" id="lgErr"></div>
       <button class="btn btn-p" onclick="enterApp()">Entrar ⚽</button>
-      <button class="lg-install hide" id="installBtnLogin" onclick="openInstallModal()">📲 Instalar en tu teléfono</button>
+      <button class="lg-install" id="installBtnLogin" onclick="openInstallModal()">📲 Instalar en tu teléfono</button>
       <div class="lg-foot">Elige tu nombre y entra — sin PIN.</div>
     </div>
   </div>
@@ -414,7 +414,7 @@
         <li>Confirma — listo.</li>
       </ol>
     </div>
-    <button class="btn btn-g" onclick="dismissInstallPrompt()">Ahora no</button>
+    <button class="btn btn-g" onclick="closeInstallModal()">Cerrar</button>
   </div>
 </div>
 
@@ -431,7 +431,7 @@
 
 <script>
 (function(){
-  var VER='oraculo-v10';
+  var VER='oraculo-v11';
   if(localStorage.getItem('__oraculo_ver')!==VER){
     localStorage.setItem('__oraculo_ver',VER);
     if('serviceWorker' in navigator){
@@ -446,7 +446,7 @@
   }
 })();
 // ── CONFIG ──
-const APP_VERSION = 'oraculo-v10';
+const APP_VERSION = 'oraculo-v11';
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRL3W0W9U1X0UsmA_rj2g_qEHfZ5LlcN0GYLho';
 const POOL_ID = 'oraculo';
@@ -1028,8 +1028,8 @@ window.addEventListener('appinstalled',function(){
 });
 
 function updateInstallUI(){
-  const dismissed=localStorage.getItem('oraculo_install_dismiss')==='1';
-  const show=!IS_STANDALONE&&!dismissed;
+  try{ localStorage.removeItem('oraculo_install_dismiss'); }catch(e){}
+  const show=!IS_STANDALONE;
   const loginBtn=document.getElementById('installBtnLogin');
   const menuItem=document.getElementById('installMenuItem');
   if(loginBtn) loginBtn.classList.toggle('hide',!show);
@@ -1054,12 +1054,6 @@ function openInstallModal(){
 
 function closeInstallModal(){
   document.getElementById('installModal').classList.remove('on');
-}
-
-function dismissInstallPrompt(){
-  try{ localStorage.setItem('oraculo_install_dismiss','1'); }catch(e){}
-  closeInstallModal();
-  updateInstallUI();
 }
 
 async function triggerNativeInstall(){
