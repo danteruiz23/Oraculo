@@ -6,10 +6,13 @@
   <meta name="format-detection" content="telephone=no">
   <meta name="theme-color" content="#1a103d">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Oráculo">
   <meta name="description" content="Oráculo · confirmación de asistencia al fútbol sala de los martes (no es ScoreMaster).">
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
   <title>Oráculo · Fútbol Sala Martes</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -72,6 +75,9 @@
     .shake{animation:shk .4s;}
     @keyframes shk{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-9px);}40%,80%{transform:translateX(9px);}}
     .lg-foot{text-align:center;font-size:11px;color:var(--tx3);margin-top:16px;line-height:1.6;}
+    .lg-install{width:100%;margin-top:12px;border:1.5px solid rgba(251,191,36,.45);border-radius:14px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;
+      color:var(--gold);background:rgba(251,191,36,.08);}
+    .lg-install.hide{display:none;}
 
     /* ── APP ── */
     #app{display:none;flex-direction:column;min-height:100%;}
@@ -161,6 +167,11 @@
     .btn{width:100%;border:none;border-radius:14px;padding:15px;font-size:16px;font-weight:800;cursor:pointer;}
     .btn-p{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;}
     .btn-g{background:var(--card2);color:var(--tx2);margin-top:10px;}
+    .install-steps{margin:14px 0 6px;padding-left:18px;color:var(--tx2);font-size:14px;line-height:1.65;}
+    .install-steps li{margin-bottom:8px;}
+    .install-steps b{color:var(--tx);}
+    .install-note{font-size:12px;color:var(--tx3);margin-top:10px;line-height:1.5;}
+    .install-android-btn{margin-top:12px;}
 
     /* quorum */
     .quorum{margin-top:14px;border-radius:14px;padding:13px 16px;text-align:center;font-size:14px;font-weight:800;}
@@ -242,6 +253,7 @@
       </div>
       <div class="lg-err" id="lgErr"></div>
       <button class="btn btn-p" onclick="enterApp()">Entrar ⚽</button>
+      <button class="lg-install hide" id="installBtnLogin" onclick="openInstallModal()">📲 Instalar en tu teléfono</button>
       <div class="lg-foot">Elige tu nombre y entra — sin PIN.</div>
     </div>
   </div>
@@ -259,6 +271,7 @@
     </div>
     <div class="av" id="hdrAv" onclick="toggleMenu(event)">DR</div>
     <div class="menu" id="menu">
+      <div class="menu-it" id="installMenuItem" onclick="openInstallModal()">📲 Instalar app</div>
       <div class="menu-it" id="adminToggle" onclick="toggleAdmin()">🔐 Modo admin</div>
       <div class="menu-it" onclick="doLogout()">🚪 Salir</div>
     </div>
@@ -379,6 +392,32 @@
   </div>
 </div>
 
+<!-- install PWA modal -->
+<div class="modal" id="installModal" onclick="if(event.target===this)closeInstallModal()">
+  <div class="sheet">
+    <h3>📲 Instalar Oráculo</h3>
+    <p>Queda un icono en tu pantalla de inicio, como una app normal. No necesitas App Store ni Google Play.</p>
+    <div id="installIOS" style="display:none;">
+      <ol class="install-steps">
+        <li>Abre esta página en <b>Safari</b> (no Chrome ni WhatsApp).</li>
+        <li>Toca el botón <b>Compartir</b> (cuadrado con flecha ↑).</li>
+        <li>Elige <b>“Añadir a pantalla de inicio”</b>.</li>
+        <li>Confirma — verás el icono <b>Oráculo</b> 🔮.</li>
+      </ol>
+    </div>
+    <div id="installAndroid" style="display:none;">
+      <p id="installAndroidHint" class="install-note">En Chrome puedes instalar con un toque:</p>
+      <button class="btn btn-p install-android-btn" id="installAndroidBtn" onclick="triggerNativeInstall()">Instalar aplicación</button>
+      <ol class="install-steps" id="installAndroidSteps">
+        <li>Abre en <b>Chrome</b>.</li>
+        <li>Menú <b>⋮</b> → <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>.</li>
+        <li>Confirma — listo.</li>
+      </ol>
+    </div>
+    <button class="btn btn-g" onclick="dismissInstallPrompt()">Ahora no</button>
+  </div>
+</div>
+
 <!-- admin modal -->
 <div class="modal" id="adminModal" onclick="if(event.target===this)closeAdmin()">
   <div class="sheet">
@@ -392,7 +431,7 @@
 
 <script>
 (function(){
-  var VER='oraculo-v9';
+  var VER='oraculo-v10';
   if(localStorage.getItem('__oraculo_ver')!==VER){
     localStorage.setItem('__oraculo_ver',VER);
     if('serviceWorker' in navigator){
@@ -407,7 +446,7 @@
   }
 })();
 // ── CONFIG ──
-const APP_VERSION = 'oraculo-v9';
+const APP_VERSION = 'oraculo-v10';
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRL3W0W9U1X0UsmA_rj2g_qEHfZ5LlcN0GYLho';
 const POOL_ID = 'oraculo';
@@ -970,6 +1009,72 @@ document.addEventListener('visibilitychange', async ()=>{
 })();
 
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+
+// ── PWA INSTALL ──
+let deferredInstallPrompt=null;
+const IS_STANDALONE=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+const IS_IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  updateInstallUI();
+});
+
+window.addEventListener('appinstalled',function(){
+  deferredInstallPrompt=null;
+  updateInstallUI();
+  toast('✅ Oráculo instalado');
+});
+
+function updateInstallUI(){
+  const dismissed=localStorage.getItem('oraculo_install_dismiss')==='1';
+  const show=!IS_STANDALONE&&!dismissed;
+  const loginBtn=document.getElementById('installBtnLogin');
+  const menuItem=document.getElementById('installMenuItem');
+  if(loginBtn) loginBtn.classList.toggle('hide',!show);
+  if(menuItem) menuItem.style.display=show?'block':'none';
+}
+
+function openInstallModal(){
+  document.getElementById('menu')?.classList.remove('on');
+  document.getElementById('installIOS').style.display=IS_IOS?'block':'none';
+  document.getElementById('installAndroid').style.display=IS_IOS?'none':'block';
+  const nativeBtn=document.getElementById('installAndroidBtn');
+  const steps=document.getElementById('installAndroidSteps');
+  const hint=document.getElementById('installAndroidHint');
+  if(!IS_IOS&&nativeBtn){
+    const canNative=!!deferredInstallPrompt;
+    nativeBtn.style.display=canNative?'block':'none';
+    if(steps) steps.style.display=canNative?'none':'block';
+    if(hint) hint.textContent=canNative?'Chrome te permite instalar con un toque:':'En Chrome: menú ⋮ → Instalar aplicación.';
+  }
+  document.getElementById('installModal').classList.add('on');
+}
+
+function closeInstallModal(){
+  document.getElementById('installModal').classList.remove('on');
+}
+
+function dismissInstallPrompt(){
+  try{ localStorage.setItem('oraculo_install_dismiss','1'); }catch(e){}
+  closeInstallModal();
+  updateInstallUI();
+}
+
+async function triggerNativeInstall(){
+  if(!deferredInstallPrompt){ openInstallModal(); return; }
+  deferredInstallPrompt.prompt();
+  const {outcome}=await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt=null;
+  if(outcome==='accepted'){
+    closeInstallModal();
+    toast('✅ Oráculo instalado');
+  }
+  updateInstallUI();
+}
+
+updateInstallUI();
 </script>
 </body>
 </html>

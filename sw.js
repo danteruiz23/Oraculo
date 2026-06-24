@@ -1,6 +1,6 @@
 // Oraculo · Service Worker
-const CACHE = 'oraculo-v9';
-const ASSETS = ['./', './index.html', './manifest.json'];
+const CACHE = 'oraculo-v10';
+const ASSETS = ['./', './index.html', './manifest.json', './icons/icon-192.svg', './icons/icon-512.svg', './icons/icon-maskable.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

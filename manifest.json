@@ -1,25 +1,35 @@
 {
+  "id": "/",
   "name": "Oráculo · Fútbol Sala Martes",
   "short_name": "Oráculo",
   "description": "Confirma tu asistencia al fútbol sala de los martes 7:30-8:30 PM.",
-  "start_url": "./index.html",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#0e0820",
   "theme_color": "#1a103d",
   "lang": "es",
+  "categories": ["sports", "social"],
   "icons": [
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMWExMDNkIi8+PHRleHQgeD0iOTYiIHk9IjEzMCIgZm9udC1zaXplPSIxMTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPvCflJw8L3RleHQ+PC9zdmc+",
+      "src": "icons/icon-192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjEwNiIgZmlsbD0iIzFhMTAzZCIvPjx0ZXh0IHg9IjI1NiIgeT0iMzUwIiBmb250LXNpemU9IjMwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+8J+UnDwvdGV4dD48L3N2Zz4=",
+      "src": "icons/icon-512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }
