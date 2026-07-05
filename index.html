@@ -610,7 +610,10 @@ async function enterApp(){
 }
 
 async function loadPlayers(){
-  const {data,error}=await sb.from('participants').select('id,name,init,cls,active,is_admin').eq('pool',POOL_ID).order('id');
+  let {data,error}=await sb.from('participants').select('id,name,init,cls,active,is_admin').eq('pool',POOL_ID).order('id');
+  if(error && /is_admin/i.test(error.message||'')){
+    ({data,error}=await sb.from('participants').select('id,name,init,cls,active').eq('pool',POOL_ID).order('id'));
+  }
   if(error){ toast('⚠️ '+error.message); return; }
   PLAYERS=(data||[]).filter(p=>p.active!==false).map(p=>({id:p.id,name:p.name,init:p.init||initials(p.name),cls:p.cls||'c0',is_admin:!!p.is_admin}));
   const sel=document.getElementById('lgName');
@@ -995,17 +998,25 @@ function openAdminModal(){
   setTimeout(()=>i.focus(),120);
 }
 function closeAdmin(){ document.getElementById('adminModal').classList.remove('on'); }
+async function verifyAdminPin(pin){
+  if(CU===null) return false;
+  try{
+    const {data,error}=await sb.rpc('verify_admin_pin',{p_pool:POOL_ID,p_user_id:CU,p_pin:pin});
+    if(!error && data) return true;
+  }catch(e){}
+  const me=getPlayer(CU);
+  if(!me?.is_admin) return false;
+  try{
+    const {data,error}=await sb.rpc('verify_pin',{p_pool:POOL_ID,p_user_id:CU,p_pin:pin});
+    return !error && !!data;
+  }catch(e){}
+  return false;
+}
 async function submitAdmin(){
   const k=document.getElementById('adminKeyInput').value.trim();
   if(!k){ toast('⚠️ Ingresa la clave'); return; }
   if(k===ADMIN_KEY){ isAdminMode=true; closeAdmin(); render(); toast('🔐 Modo admin activado'); return; }
-  const me=getPlayer(CU);
-  if(me?.is_admin){
-    try{
-      const {data,error}=await sb.rpc('verify_pin',{p_pool:POOL_ID,p_user_id:CU,p_pin:k});
-      if(!error && data===true){ isAdminMode=true; closeAdmin(); render(); toast('🔐 Modo admin activado'); return; }
-    }catch(e){}
-  }
+  if(await verifyAdminPin(k)){ isAdminMode=true; closeAdmin(); render(); toast('🔐 Modo admin activado'); return; }
   toast('❌ Clave incorrecta');
 }
 

@@ -42,7 +42,7 @@ const headers = {
 };
 
 const pool = 'oraculo';
-const name = 'Pipita';
+const name = 'Admin';
 
 const listRes = await fetch(
   `${url}/rest/v1/participants?pool=eq.${pool}&select=id,name,is_admin,pin&order=id`,
@@ -61,7 +61,7 @@ if (existing) {
     {
       method: 'PATCH',
       headers,
-      body: JSON.stringify({ pin: '1111', active: true, is_admin: true, init: 'PI' }),
+      body: JSON.stringify({ pin: '1111', active: true, is_admin: true, init: 'AD', name: 'Admin' }),
     }
   );
   if (!patchRes.ok) {
@@ -69,7 +69,7 @@ if (existing) {
     console.error('Si falta la columna is_admin, ejecuta supabase_add_pipita.sql en Supabase.');
     process.exit(1);
   }
-  console.log(`✅ Pipita actualizada (id ${existing.id}, PIN 1111, admin)`);
+  console.log(`✅ Admin actualizado (id ${existing.id}, PIN 1111, admin)`);
   process.exit(0);
 }
 
@@ -81,7 +81,7 @@ const insertRes = await fetch(`${url}/rest/v1/participants`, {
     id: nextId,
     pool,
     name,
-    init: 'PI',
+    init: 'AD',
     cls: `c${nextId % 6}`,
     pin: '1111',
     active: true,
@@ -96,4 +96,4 @@ if (!insertRes.ok) {
 }
 
 const created = await insertRes.json();
-console.log(`✅ Pipita creada (id ${created[0]?.id ?? nextId}, PIN 1111, admin)`);
+console.log(`✅ Admin creado (id ${created[0]?.id ?? nextId}, PIN 1111, admin)`);
