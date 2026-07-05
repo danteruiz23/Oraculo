@@ -443,7 +443,7 @@
 <div class="modal" id="adminModal" onclick="if(event.target===this)closeAdmin()">
   <div class="sheet">
     <h3>🔐 Modo administrador</h3>
-    <p>Ingresa la clave para gestionar jugadores y cambiar asistencias.</p>
+    <p>Ingresa la clave global de admin o tu PIN si eres administradora.</p>
     <div class="fld"><label>Clave de admin</label><input id="adminKeyInput" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" style="text-align:center;"></div>
     <button class="btn btn-p" onclick="submitAdmin()">Activar admin</button>
     <button class="btn btn-g" onclick="closeAdmin()">Cancelar</button>
@@ -481,7 +481,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── STATE ──
 let CU = null;               // current user id
-let PLAYERS = [];            // [{id,name,init,cls}]
+let PLAYERS = [];            // [{id,name,init,cls,is_admin}]
 let ATT = {};               // {user_id: 'si'|'no'}
 let TEAMS = {};             // {user_id: 'A'|'B'}
 let MATCH_SCORE = null;     // {a,b} or null
@@ -610,9 +610,9 @@ async function enterApp(){
 }
 
 async function loadPlayers(){
-  const {data,error}=await sb.from('participants').select('id,name,init,cls,active').eq('pool',POOL_ID).order('id');
+  const {data,error}=await sb.from('participants').select('id,name,init,cls,active,is_admin').eq('pool',POOL_ID).order('id');
   if(error){ toast('⚠️ '+error.message); return; }
-  PLAYERS=(data||[]).filter(p=>p.active!==false).map(p=>({id:p.id,name:p.name,init:p.init||initials(p.name),cls:p.cls||'c0'}));
+  PLAYERS=(data||[]).filter(p=>p.active!==false).map(p=>({id:p.id,name:p.name,init:p.init||initials(p.name),cls:p.cls||'c0',is_admin:!!p.is_admin}));
   const sel=document.getElementById('lgName');
   sel.innerHTML='<option value="">— Elige tu nombre —</option>'+PLAYERS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
 }
@@ -995,10 +995,18 @@ function openAdminModal(){
   setTimeout(()=>i.focus(),120);
 }
 function closeAdmin(){ document.getElementById('adminModal').classList.remove('on'); }
-function submitAdmin(){
+async function submitAdmin(){
   const k=document.getElementById('adminKeyInput').value.trim();
-  if(k===ADMIN_KEY){ isAdminMode=true; closeAdmin(); render(); toast('🔐 Modo admin activado'); }
-  else toast('❌ Clave incorrecta');
+  if(!k){ toast('⚠️ Ingresa la clave'); return; }
+  if(k===ADMIN_KEY){ isAdminMode=true; closeAdmin(); render(); toast('🔐 Modo admin activado'); return; }
+  const me=getPlayer(CU);
+  if(me?.is_admin){
+    try{
+      const {data,error}=await sb.rpc('verify_pin',{p_pool:POOL_ID,p_user_id:CU,p_pin:k});
+      if(!error && data===true){ isAdminMode=true; closeAdmin(); render(); toast('🔐 Modo admin activado'); return; }
+    }catch(e){}
+  }
+  toast('❌ Clave incorrecta');
 }
 
 // Al volver a la app tras medianoche, actualizar fechas (martes pasado desaparece)
