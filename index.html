@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta name="format-detection" content="telephone=no">
-  <meta name="theme-color" content="#1a103d">
+  <meta name="theme-color" content="#151228">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -22,13 +22,13 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
     :root{
-      --p1:#140a2e;--p2:#1f1147;--p3:#2d1b69;--p4:#4c2a85;
-      --acc:#7c3aed;--acc2:#a855f7;--acc3:#c084fc;
-      --gold:#fbbf24;
+      --p1:#0c0a1a;--p2:#151228;--p3:#1e1838;--p4:#2a2250;
+      --acc:#6366f1;--acc2:#818cf8;--acc3:#a5b4fc;
+      --gold:#eab308;
       --si:#22c55e;--si2:#16a34a;--no:#ef4444;--no2:#dc2626;
-      --bg:#0e0820;--card:#1b1140;--card2:#241652;
-      --tx:#ede9fe;--tx2:#b9aee0;--tx3:#7c719e;
-      --line:rgba(168,85,247,.16);
+      --bg:#0c0a1a;--card:#16132a;--card2:#1f1b38;
+      --tx:#eef2ff;--tx2:#b8bdd9;--tx3:#7b82a8;
+      --line:rgba(129,140,248,.16);
       --r:18px;--safe-b:env(safe-area-inset-bottom,0px);
       --sh:0 8px 30px rgba(0,0,0,.4);
     }
@@ -41,24 +41,24 @@
     #loadOverlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;
       align-items:center;justify-content:center;gap:16px;transition:opacity .4s;}
     #loadOverlay.hide{opacity:0;pointer-events:none;}
-    .spin{width:46px;height:46px;border:4px solid rgba(168,85,247,.18);border-top-color:var(--acc2);border-radius:50%;animation:sp .8s linear infinite;}
+    .spin{width:46px;height:46px;border:4px solid rgba(129,140,248,.18);border-top-color:var(--acc2);border-radius:50%;animation:sp .8s linear infinite;}
     @keyframes sp{to{transform:rotate(360deg);}}
     .lo-msg{color:var(--tx2);font-size:14px;font-weight:600;}
 
     /* ── LOGIN ── */
     #login{position:fixed;inset:0;z-index:900;overflow-y:auto;
-      background:radial-gradient(120% 80% at 50% -10%,#3a1d7a 0%,#1f1147 45%,#0e0820 100%);
+      background:radial-gradient(120% 80% at 50% -10%,#3d3570 0%,#151228 45%,#0c0a1a 100%);
       display:flex;flex-direction:column;align-items:center;justify-content:center;
       padding:calc(env(safe-area-inset-top,0) + 20px) 22px calc(var(--safe-b) + 20px);transition:opacity .4s,transform .4s;}
     #login.out{opacity:0;transform:scale(1.04);pointer-events:none;}
     .lg-wrap{width:100%;max-width:380px;}
     .lg-brand{text-align:center;margin-bottom:22px;}
-    .lg-orb{font-size:54px;filter:drop-shadow(0 6px 18px rgba(168,85,247,.6));}
+    .lg-orb{font-size:54px;filter:drop-shadow(0 6px 18px rgba(129,140,248,.6));}
     .lg-title{font-size:34px;font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,var(--acc3),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px;}
     .lg-sub{font-size:18px;color:var(--tx2);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-top:6px;}
     .lg-url{font-size:11px;color:var(--tx3);margin-top:10px;letter-spacing:.3px;}
     .lg-event{font-size:16px;color:var(--gold);font-weight:800;margin-top:12px;}
-    .lg-card{background:rgba(27,17,64,.7);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r);padding:20px 18px;box-shadow:var(--sh);}
+    .lg-card{background:rgba(22,19,42,.7);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:var(--r);padding:20px 18px;box-shadow:var(--sh);}
     .lg-sel-wrap{position:relative;margin-bottom:16px;}
     .lg-sel{width:100%;appearance:none;background:var(--card2);border:1.5px solid var(--line);border-radius:14px;
       color:var(--tx);font-size:16px;font-weight:700;padding:14px 40px 14px 14px;cursor:pointer;}
@@ -78,7 +78,7 @@
     @keyframes shk{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-9px);}40%,80%{transform:translateX(9px);}}
     .lg-foot{text-align:center;font-size:11px;color:var(--tx3);margin-top:16px;line-height:1.6;}
     .lg-install{width:100%;margin-top:12px;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:900;cursor:pointer;
-      color:#3a2900;background:linear-gradient(135deg,var(--gold),#f59e0b);box-shadow:0 6px 20px rgba(251,191,36,.35);
+      color:#422006;background:linear-gradient(135deg,var(--gold),#ca8a04);box-shadow:0 6px 20px rgba(234,179,8,.35);
       -webkit-appearance:none;appearance:none;touch-action:manipulation;}
     .lg-install:active{transform:scale(.98);filter:brightness(1.05);}
     .lg-install.hide{display:none;}
@@ -99,9 +99,9 @@
     .menu-it:active{background:var(--card2);}
 
     /* admin vistoso */
-    .av.admin-on{box-shadow:0 0 0 3px var(--gold),0 0 16px rgba(251,191,36,.75);}
-    #adminBar{display:none;background:linear-gradient(90deg,#fde047,var(--gold),#f59e0b);color:#3a2900;font-weight:900;
-      text-align:center;padding:11px 14px;font-size:13px;letter-spacing:.4px;cursor:pointer;box-shadow:0 4px 16px rgba(251,191,36,.45);}
+    .av.admin-on{box-shadow:0 0 0 3px var(--gold),0 0 16px rgba(234,179,8,.75);}
+    #adminBar{display:none;background:linear-gradient(90deg,#fde047,var(--gold),#ca8a04);color:#422006;font-weight:900;
+      text-align:center;padding:11px 14px;font-size:13px;letter-spacing:.4px;cursor:pointer;box-shadow:0 4px 16px rgba(234,179,8,.45);}
     #adminBar.on{display:block;animation:abPulse 1.8s ease-in-out infinite;}
     @keyframes abPulse{0%,100%{filter:brightness(1);}50%{filter:brightness(1.15);}}
     #adminBar .x{margin-left:8px;opacity:.7;}
@@ -144,7 +144,7 @@
     .sec-t .pill{margin-left:auto;background:var(--card2);color:var(--tx2);font-size:12px;font-weight:800;padding:2px 10px;border-radius:20px;}
     .row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 14px;margin-bottom:8px;}
     .row .ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;flex-shrink:0;}
-    .c0{background:#7c3aed;}.c1{background:#2563eb;}.c2{background:#0891b2;}.c3{background:#db2777;}.c4{background:#ea580c;}.c5{background:#16a34a;}
+    .c0{background:#6366f1;}.c1{background:#4338ca;}.c2{background:#0891b2;}.c3{background:#db2777;}.c4{background:#ea580c;}.c5{background:#16a34a;}
     .row .nm{flex:1;font-size:15px;font-weight:700;}
     .row .tag{font-size:18px;}
     .row.dim{opacity:.55;}
@@ -155,10 +155,10 @@
     .empty{color:var(--tx3);font-size:13px;text-align:center;padding:10px;}
 
     .fab{position:fixed;right:18px;bottom:calc(var(--safe-b) + 20px);z-index:40;background:linear-gradient(135deg,var(--acc),var(--acc2));
-      color:#fff;border:none;border-radius:30px;padding:14px 20px;font-size:15px;font-weight:800;box-shadow:0 8px 24px rgba(124,58,237,.5);cursor:pointer;display:flex;align-items:center;gap:8px;}
+      color:#fff;border:none;border-radius:30px;padding:14px 20px;font-size:15px;font-weight:800;box-shadow:0 8px 24px rgba(99,102,241,.5);cursor:pointer;display:flex;align-items:center;gap:8px;}
 
     /* modal */
-    .modal{position:fixed;inset:0;z-index:200;background:rgba(8,4,20,.7);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;}
+    .modal{position:fixed;inset:0;z-index:200;background:rgba(12,10,26,.7);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;}
     .modal.on{display:flex;}
     .sheet{background:var(--card);border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-width:560px;padding:22px 18px calc(var(--safe-b) + 22px);box-shadow:var(--sh);animation:up .3s cubic-bezier(0.34, 1.56, 0.64, 1);}
     @keyframes up{from{transform:translateY(100%);}to{transform:translateY(0);}}
@@ -180,11 +180,11 @@
     /* quorum */
     .quorum{margin-top:14px;border-radius:14px;padding:13px 16px;text-align:center;font-size:14px;font-weight:800;}
     .quorum.q-full{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--si);}
-    .quorum.q-wait{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);color:#f59e0b;}
+    .quorum.q-wait{background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.25);color:#ca8a04;}
 
     /* armar equipos */
     .teams-open{width:100%;margin-top:14px;border:none;border-radius:16px;padding:15px;font-size:16px;font-weight:900;cursor:pointer;
-      color:#fff;background:linear-gradient(135deg,#2563eb,var(--acc2));box-shadow:0 8px 24px rgba(124,58,237,.4);letter-spacing:.3px;}
+      color:#fff;background:linear-gradient(135deg,#4338ca,var(--acc2));box-shadow:0 8px 24px rgba(99,102,241,.4);letter-spacing:.3px;}
     #teamsScreen{position:fixed;inset:0;z-index:250;background:var(--bg);display:none;flex-direction:column;}
     #teamsScreen.on{display:flex;}
     .ts-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;
@@ -195,7 +195,7 @@
     .ts-body{flex:1;overflow-y:auto;padding:14px 12px calc(var(--safe-b) + 24px);max-width:620px;width:100%;margin:0 auto;}
     .ts-ctrls{display:flex;gap:10px;margin-bottom:12px;}
     .ts-btn{flex:1;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:900;cursor:pointer;}
-    .ts-shuffle{background:linear-gradient(135deg,var(--gold),#f59e0b);color:#3a2900;}
+    .ts-shuffle{background:linear-gradient(135deg,var(--gold),#ca8a04);color:#422006;}
     .ts-clear{background:var(--card2);color:var(--tx2);}
     .ts-hint{color:var(--tx3);font-size:12px;text-align:center;margin-bottom:12px;}
     .ts-score{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 12px;margin-bottom:14px;text-align:center;}
@@ -214,7 +214,7 @@
     .ts-team.ts-b{border-top:3px solid #475569;}
     .ts-team-h{font-size:13px;font-weight:900;text-align:center;margin-bottom:4px;color:var(--tx);}
     .ts-team-score{text-align:center;font-size:34px;font-weight:900;line-height:1;color:var(--gold);
-      margin:2px 0 12px;letter-spacing:-1px;text-shadow:0 2px 14px rgba(251,191,36,.35);}
+      margin:2px 0 12px;letter-spacing:-1px;text-shadow:0 2px 14px rgba(234,179,8,.35);}
     .ts-team-score.empty{display:none;}
     .ts-team-score.ts-score-win{color:#fde047;text-shadow:0 0 18px rgba(253,224,71,.45);}
     .ts-team-score.ts-score-lose{color:#d97706;opacity:.85;}
@@ -228,7 +228,7 @@
     .ts-bench-h{font-size:13px;font-weight:900;text-align:center;margin-bottom:10px;color:var(--tx2);}
 
     /* toast */
-    #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;color:#1b1140;
+    #toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;color:#16132a;
       padding:11px 20px;border-radius:22px;font-size:13px;font-weight:800;opacity:0;transition:all .3s;z-index:300;pointer-events:none;white-space:nowrap;box-shadow:var(--sh);}
     #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     .live{display:inline-block;width:7px;height:7px;background:var(--si);border-radius:50%;margin-right:5px;animation:bl 1.2s infinite;}
@@ -236,19 +236,19 @@
 
     /* ── PWA FLOATING INSTALL BUTTON ── */
     .pwa-install-btn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 14px);
-      z-index:300;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:30px;
-      padding:13px 22px;font-size:15px;font-weight:900;box-shadow:0 8px 24px rgba(124,58,237,.5);cursor:pointer;}
-    .pwa-ios{position:fixed;inset:0;z-index:400;background:rgba(8,4,20,.72);backdrop-filter:blur(4px);
+      z-index:300;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;border:none;border-radius:30px;
+      padding:13px 22px;font-size:15px;font-weight:900;box-shadow:0 8px 24px rgba(99,102,241,.5);cursor:pointer;}
+    .pwa-ios{position:fixed;inset:0;z-index:400;background:rgba(12,10,26,.72);backdrop-filter:blur(4px);
       display:none;align-items:flex-end;justify-content:center;}
     .pwa-ios.on{display:flex;}
-    .pwa-ios-card{background:#1b1140;color:#ede9fe;width:100%;max-width:480px;border-top-left-radius:24px;border-top-right-radius:24px;
+    .pwa-ios-card{background:#16132a;color:#eef2ff;width:100%;max-width:480px;border-top-left-radius:24px;border-top-right-radius:24px;
       padding:22px 20px calc(env(safe-area-inset-bottom,0px) + 22px);box-shadow:0 -8px 30px rgba(0,0,0,.5);}
     .pwa-ios-title{font-size:18px;font-weight:900;margin-bottom:14px;text-align:center;}
     .pwa-ios-steps{margin:0 0 16px 18px;font-size:15px;line-height:1.9;}
-    .pwa-share{display:inline-block;background:#2563eb;color:#fff;border-radius:6px;padding:0 6px;}
+    .pwa-share{display:inline-block;background:#4338ca;color:#fff;border-radius:6px;padding:0 6px;}
     .pwa-ok{width:100%;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:800;
-      background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;cursor:pointer;}
-    .pwa-arrow{text-align:center;color:#b9aee0;font-size:13px;font-weight:700;margin-top:14px;animation:pwaB 1.4s infinite;}
+      background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;cursor:pointer;}
+    .pwa-arrow{text-align:center;color:#b8bdd9;font-size:13px;font-weight:700;margin-top:14px;animation:pwaB 1.4s infinite;}
     @keyframes pwaB{0%,100%{transform:translateY(0);}50%{transform:translateY(5px);}}
   </style>
 </head>
@@ -714,7 +714,7 @@ function render(){
 
   const canDel=(p)=>isAdmin();
   const delBtn=(p)=>canDel(p)?`<button onclick="removePlayer(${p.id})" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">🗑️ Eliminar</button>`:``;
-  const editBtn=(p)=>isAdmin()?`<button onclick="openEdit(${p.id})" style="background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);color:var(--acc3);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Editar</button>`:``;
+  const editBtn=(p)=>isAdmin()?`<button onclick="openEdit(${p.id})" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:var(--acc3);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;">✏️ Editar</button>`:``;
   const aBtn=(p,st,emoji,c)=>{const on=ATT[p.id]===st;return `<button onclick="setFor(${p.id},'${st}')" style="background:${on?c:'rgba(255,255,255,.05)'};border:1px solid ${on?c:'var(--line)'};border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;color:#fff;">${emoji}</button>`;};
   const statusBtns=(p)=>`<div style="display:flex;gap:4px;">${aBtn(p,'si','✅','rgba(34,197,94,.4)')}${aBtn(p,'maybe','❓','rgba(245,158,11,.4)')}${aBtn(p,'no','❌','rgba(239,68,68,.4)')}</div>`;
   const rowHtml=(p,tag,dim)=>{
@@ -1124,9 +1124,9 @@ window.addEventListener('load',function(){
   <div class="pwa-ios-card">
     <div class="pwa-ios-title">📲 Instalar en tu iPhone / Install on iPhone</div>
     <ol class="pwa-ios-steps">
-      <li>Busca los tres puntos <b>···</b> en la esquina inferior derecha<br><span style="color:#b9aee0;font-size:13px">Find the three dots <b>···</b> at the bottom right</span></li>
-      <li>Toca <b>Compartir / Share</b> <span class="pwa-share">⬆️</span><br><span style="color:#b9aee0;font-size:13px">Tap the Share button</span></li>
-      <li>Busca abajo <b>Añadir / Add to Home Screen</b> 📱<br><span style="color:#b9aee0;font-size:13px">Scroll down and tap Add to Home Screen</span></li>
+      <li>Busca los tres puntos <b>···</b> en la esquina inferior derecha<br><span style="color:#b8bdd9;font-size:13px">Find the three dots <b>···</b> at the bottom right</span></li>
+      <li>Toca <b>Compartir / Share</b> <span class="pwa-share">⬆️</span><br><span style="color:#b8bdd9;font-size:13px">Tap the Share button</span></li>
+      <li>Busca abajo <b>Añadir / Add to Home Screen</b> 📱<br><span style="color:#b8bdd9;font-size:13px">Scroll down and tap Add to Home Screen</span></li>
     </ol>
     <button class="pwa-ok" onclick="document.getElementById('iosGuide').classList.remove('on')">Entendido / Got it</button>
     <div class="pwa-arrow">⬇️ Compartir / Share está abajo · bottom of Safari</div>

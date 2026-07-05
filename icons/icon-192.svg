@@ -1,19 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1a103d"/>
-      <stop offset="100%" stop-color="#4c2a85"/>
+      <stop offset="0%" stop-color="#151228"/>
+      <stop offset="100%" stop-color="#2a2250"/>
     </linearGradient>
     <radialGradient id="orb" cx="40%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#ede9fe"/>
-      <stop offset="45%" stop-color="#a855f7"/>
-      <stop offset="100%" stop-color="#5b21b6"/>
+      <stop offset="0%" stop-color="#eef2ff"/>
+      <stop offset="45%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#4338ca"/>
     </radialGradient>
   </defs>
   <rect width="192" height="192" rx="40" fill="url(#bg)"/>
   <circle cx="96" cy="82" r="46" fill="url(#orb)"/>
   <ellipse cx="82" cy="68" rx="14" ry="10" fill="#fff" opacity=".45"/>
-  <path d="M52 118 Q96 138 140 118 L132 148 Q96 162 60 148 Z" fill="#7c3aed" opacity=".85"/>
-  <circle cx="128" cy="52" r="5" fill="#fbbf24"/>
-  <circle cx="52" cy="96" r="3" fill="#fbbf24" opacity=".8"/>
+  <path d="M52 118 Q96 138 140 118 L132 148 Q96 162 60 148 Z" fill="#6366f1" opacity=".85"/>
+  <circle cx="128" cy="52" r="5" fill="#eab308"/>
+  <circle cx="52" cy="96" r="3" fill="#eab308" opacity=".8"/>
 </svg>
