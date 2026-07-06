@@ -98,6 +98,18 @@
     .menu-it:last-child{border-bottom:none;}
     .menu-it:active{background:var(--card2);}
 
+    /* cancelado */
+    #cancelBanner{display:none;margin:0 0 12px;background:linear-gradient(120deg,rgba(239,68,68,.18),rgba(220,38,38,.28));
+      border:1.5px solid rgba(239,68,68,.5);border-radius:var(--r);padding:14px 16px;text-align:center;
+      color:#fca5a5;font-weight:900;font-size:15px;letter-spacing:.4px;animation:cbPulse 2s ease-in-out infinite;}
+    #cancelBanner .cb-sub{display:block;font-size:12px;font-weight:700;color:var(--tx2);margin-top:4px;letter-spacing:0;}
+    @keyframes cbPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.25);}50%{box-shadow:0 0 18px 2px rgba(239,68,68,.35);}}
+    .ask.cancelled{opacity:.45;pointer-events:none;filter:grayscale(.6);}
+    .cancel-adm{display:none;width:100%;border:none;border-radius:14px;padding:13px;margin:0 0 14px;font-size:14px;font-weight:900;cursor:pointer;
+      color:#fff;background:linear-gradient(135deg,var(--no),var(--no2));box-shadow:0 6px 18px rgba(239,68,68,.35);
+      -webkit-appearance:none;appearance:none;touch-action:manipulation;}
+    .cancel-adm.reactivate{background:linear-gradient(135deg,var(--si),var(--si2));box-shadow:0 6px 18px rgba(34,197,94,.35);}
+    .cancel-adm:active{transform:scale(.98);}
     /* admin vistoso */
     .av.admin-on{box-shadow:0 0 0 3px var(--gold),0 0 16px rgba(234,179,8,.75);}
     #adminBar{display:none;background:linear-gradient(90deg,#fde047,var(--gold),#ca8a04);color:#422006;font-weight:900;
@@ -313,7 +325,10 @@
       <div class="hero-time">🕖 7:30 – 8:30 PM</div>
     </div>
 
-    <div class="ask">
+    <div id="cancelBanner">⛔ PARTIDO CANCELADO<span class="cb-sub">No se logró reunir suficientes participantes</span></div>
+    <button class="cancel-adm" id="btnCancelMatch" onclick="toggleCancelMatch()">⛔ Cancelar partido (admin)</button>
+
+    <div class="ask" id="askBox">
       <div class="ask-q" id="askQ">¿Vas este martes?</div>
       <div class="ans">
         <button class="ans-btn si" id="btnSi" onclick="setMy('si')"><span class="em">✅</span>SÍ VOY</button>
@@ -452,7 +467,7 @@
 
 <script>
 (function(){
-  var VER='oraculo-v12';
+  var VER='oraculo-v13';
   if(localStorage.getItem('__oraculo_ver')!==VER){
     localStorage.setItem('__oraculo_ver',VER);
     if('serviceWorker' in navigator){
@@ -467,7 +482,7 @@
   }
 })();
 // ── CONFIG ──
-const APP_VERSION = 'oraculo-v12';
+const APP_VERSION = 'oraculo-v13';
 const SUPABASE_URL = 'https://cqinovwhmhjsrtwdnjis.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaW5vdndobWhqc3J0d2RuamlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NjgwNjksImV4cCI6MjA5NzU0NDA2OX0.4liC6uRL3W0W9U1X0UsmA_rj2g_qEHfZ5LlcN0GYLho';
 const POOL_ID = 'oraculo';
@@ -485,6 +500,7 @@ let PLAYERS = [];            // [{id,name,init,cls,is_admin}]
 let ATT = {};               // {user_id: 'si'|'no'}
 let TEAMS = {};             // {user_id: 'A'|'B'}
 let MATCH_SCORE = null;     // {a,b} or null
+let MATCH_CANCELLED = false; // partido cancelado por admin
 let teamsOpen = false;
 let TEAM_NAMES = {A:'Equipo A', B:'Equipo B'};
 let FECHAS = nextTuesdays(4); // próximos 4 martes (se recalculan cada vez que abres)
@@ -546,6 +562,7 @@ async function changeFecha(iso){
   await loadAttendance();
   await loadTeams();
   await loadMatchScore();
+  await loadMatchCancel();
   document.getElementById('loadOverlay').classList.add('hide');
   subscribe();
   render();
@@ -553,6 +570,34 @@ async function changeFecha(iso){
 }
 function scoreSettingsKey(){ return 'score_'+FECHA; }
 function scoreLocalKey(){ return 'oraculo_score_'+FECHA; }
+function cancelSettingsKey(){ return 'cancel_'+FECHA; }
+async function loadMatchCancel(){
+  MATCH_CANCELLED=false;
+  try{
+    const {data,error}=await sb.from('settings').select('value').eq('pool',POOL_ID).eq('key',cancelSettingsKey()).maybeSingle();
+    if(error){ console.warn('[cancel] Supabase:', error.message); return; }
+    MATCH_CANCELLED=(data?.value==='1');
+  }catch(e){ console.warn('[cancel load]', e); }
+}
+async function toggleCancelMatch(){
+  if(!isAdminMode){ toast('🔐 Activa Modo admin'); return; }
+  if(!MATCH_CANCELLED){
+    if(!confirm('¿Cancelar el partido de este martes? Todos verán el aviso de cancelado.')) return;
+    MATCH_CANCELLED=true; render();
+    const {error}=await sb.from('settings').upsert(
+      {pool:POOL_ID,key:cancelSettingsKey(),value:'1',updated_at:new Date().toISOString()},
+      {onConflict:'pool,key'}
+    );
+    if(error){ MATCH_CANCELLED=false; render(); toast('⚠️ No se guardó: '+error.message); return; }
+    toast('⛔ Partido cancelado');
+  } else {
+    if(!confirm('¿Reactivar el partido? Se quitará el aviso de cancelado.')) return;
+    MATCH_CANCELLED=false; render();
+    const {error}=await sb.from('settings').delete().eq('pool',POOL_ID).eq('key',cancelSettingsKey());
+    if(error){ MATCH_CANCELLED=true; render(); toast('⚠️ No se guardó: '+error.message); return; }
+    toast('✅ Partido reactivado');
+  }
+}
 function parseMatchScore(raw){
   if(!raw) return null;
   try{
@@ -631,6 +676,7 @@ async function loginOK(){
   refreshFechas();
   await loadAttendance();
   await loadMatchScore();
+  await loadMatchCancel();
   document.getElementById('loadOverlay').classList.add('hide');
   const u=getPlayer(CU);
   document.getElementById('hdrAv').textContent=u?u.init:'··';
@@ -660,6 +706,7 @@ function doLogout(){
 // ── ASISTENCIA ──
 async function setMy(status){
   if(CU===null) return;
+  if(MATCH_CANCELLED){ toast('⛔ Partido cancelado — no hay registro'); return; }
   const prev=ATT[CU];
   ATT[CU]=status; render();
   const {error}=await sb.from('attendance').upsert(
@@ -696,6 +743,15 @@ function render(){
   document.getElementById('adminBar').classList.toggle('on',isAdminMode);
   document.getElementById('hdrAv').classList.toggle('admin-on',isAdminMode);
   const at=document.getElementById('adminToggle'); if(at) at.textContent=isAdminMode?'🔓 Salir de admin':'🔐 Modo admin';
+
+  // cancelado
+  document.getElementById('cancelBanner').style.display=MATCH_CANCELLED?'block':'none';
+  document.getElementById('askBox').classList.toggle('cancelled',MATCH_CANCELLED);
+  const bc=document.getElementById('btnCancelMatch');
+  bc.style.display=isAdminMode?'block':'none';
+  bc.textContent=MATCH_CANCELLED?'✅ Reactivar partido (admin)':'⛔ Cancelar partido (admin)';
+  bc.classList.toggle('reactivate',MATCH_CANCELLED);
+
   document.getElementById('btnSi').classList.toggle('sel',ATT[CU]==='si');
   document.getElementById('btnNo').classList.toggle('sel',ATT[CU]==='no');
   document.getElementById('btnMaybe').classList.toggle('sel',ATT[CU]==='maybe');
@@ -712,7 +768,8 @@ function render(){
   document.getElementById('pPe').textContent=pe.length;
 
   const q=document.getElementById('quorum');
-  if(si.length>=MIN_PLAYERS){ q.className='quorum q-full'; q.innerHTML=`✅ ¡Hay equipo! ${si.length}/${MIN_PLAYERS} confirmados<br><span style="font-size:12px;font-weight:700;opacity:.75;">⏳ Esperando confirmación final…</span>`; }
+  if(MATCH_CANCELLED){ q.className='quorum q-wait'; q.innerHTML=`⛔ <strong>Partido cancelado</strong><br><span style="font-size:12px;font-weight:700;opacity:.75;">No se logró reunir suficientes participantes</span>`; }
+  else if(si.length>=MIN_PLAYERS){ q.className='quorum q-full'; q.innerHTML=`✅ ¡Hay equipo! ${si.length}/${MIN_PLAYERS} confirmados<br><span style="font-size:12px;font-weight:700;opacity:.75;">⏳ Esperando confirmación final…</span>`; }
   else{ const f=MIN_PLAYERS-si.length; q.className='quorum q-wait'; q.innerHTML=`⚽ Faltan <strong>${f}</strong> para completar equipo<br><span style="font-size:12px;font-weight:700;opacity:.75;">📢 Pásalo a los que no respondieron</span>`; }
 
   const canDel=(p)=>isAdmin();
@@ -912,6 +969,7 @@ function subscribe(){
     .on('postgres_changes',{event:'*',schema:'public',table:'settings',filter:`pool=eq.${POOL_ID}`},async(p)=>{
       const r=p.new||p.old;
       if(r&&r.key===scoreSettingsKey()){ await loadMatchScore(); render(); if(teamsOpen) renderTeams(); }
+      if(r&&r.key===cancelSettingsKey()){ await loadMatchCancel(); render(); }
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'participants'},async()=>{ await loadPlayers(); render(); if(teamsOpen) renderTeams(); })
     .subscribe();
